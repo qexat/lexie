@@ -16,6 +16,7 @@ module type TYPE = sig
   val paint_warning : string -> string
   val paint_info : string -> string
   val paint_note : string -> string
+  val paint_bug : string -> string
 end
 
 module Make (Config : CONFIG) : TYPE = struct
@@ -32,4 +33,5 @@ module Make (Config : CONFIG) : TYPE = struct
   let paint_warning = paint_foreground Yellow *> paint_bold
   let paint_info = paint_foreground Cyan *> paint_bold
   let paint_note = paint_foreground Magenta *> paint_bold
+  let paint_bug = paint_background Red *> paint_bold
 end

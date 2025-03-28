@@ -1,10 +1,13 @@
 open Custom
-
-let nurse = Nurse.create ()
+open Clinic
 
 module Painter = Painter.Make (struct
     let show_styling = `Auto
   end)
+
+let config : Config.t =
+  { strict = true; print_program = true; use_compiler_intrinsics = true }
+;;
 
 module Config = struct
   let strict = true
@@ -12,18 +15,16 @@ module Config = struct
   let use_compiler_intrinsics = true
 end
 
+let doctor = Doctor.create config
+
 let check () =
-  match
-    Hooks.Check.exec ~nurse ~painter:(module Painter) (module Config) Sample.program
-  with
+  match Hooks.Check.exec ~doctor ~painter:(module Painter) config Sample.program with
   | None -> 1
   | Some _ -> 0
 ;;
 
 let run () =
-  match
-    Hooks.Run.exec ~nurse ~painter:(module Painter) (module Config) Sample.program
-  with
+  match Hooks.Run.exec ~doctor ~painter:(module Painter) config Sample.program with
   | None -> 1
   | Some () -> 0
 ;;

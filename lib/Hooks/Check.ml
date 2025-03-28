@@ -1,20 +1,16 @@
-module type CONFIG = sig
-  val strict : bool
-  val print_program : bool
-  val use_compiler_intrinsics : bool
-end
-
-let setup = fun nurse -> Nurse.set_diagnosis_renderer Analysis.Diagnosis.render nurse
+open Clinic
 
 let exec =
-  fun ~nurse ~painter (module Config : CONFIG) program ->
-  if Config.print_program
-  then Printf.printf "%s\n---\n" (Analysis.Program.show painter program);
+  fun ~doctor ~painter (config : Config.t) program ->
+  if config.print_program
+  then Printf.printf "%s\n---\n" (Tail.Program.show painter program);
   let context =
-    if Config.use_compiler_intrinsics then Some Analysis.Core.intrinsics else None
+    if config.use_compiler_intrinsics then Some Analysis.Core.intrinsics else None
   in
-  let result = Analysis.Core.check ~nurse ?context program in
-  if Config.strict then Nurse.turn_warnings_into_errors nurse;
-  Nurse.report painter nurse;
-  Option.map (fun _ -> program) result
+  let _ = Analysis.Core.check ~doctor ?context program in
+  let review = Doctor.review painter doctor in
+  Option.iter (Printf.eprintf "%s\n") review.details;
+  match review.decision with
+  | Abort -> None
+  | Pass -> Some program
 ;;
