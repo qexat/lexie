@@ -6,7 +6,6 @@ let compiler_intrinsics_warning =
 
 let exec =
   fun ~nurse:_ ~painter (module Config : CONFIG) program ->
-  let code = Runtime.Core.evaluate ~painter program in
   let env =
     if Config.use_compiler_intrinsics
     then (
@@ -14,6 +13,7 @@ let exec =
       Some Runtime.Core.intrinsics)
     else None
   in
+  let code = Runtime.Core.evaluate ~painter ?env program in
   match code = 0 with
   | false -> None
   | true -> Some ()

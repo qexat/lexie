@@ -82,3 +82,14 @@ let evaluate =
     print_unreachable ~painter unreachable;
     126
 ;;
+
+let intrinsics =
+  let _Nat = Name.of_string_exn "Nat" in
+  let _O = Name.of_string_exn "O" in
+  let _S = Name.of_string_exn "S" in
+  let n = Name.of_string_exn "n" in
+  Environment.empty
+  |> Environment.add _Nat (Object.Late (Var _Nat))
+  |> Environment.add _O (Object.Constant (Nat Intp.zero))
+  |> Environment.add _S (Object.Fun (n, Late Hole))
+;;
