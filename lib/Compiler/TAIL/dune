@@ -1,0 +1,5 @@
+; Type Analysis Intermediate Language
+
+(library
+ (name tail)
+ (libraries common custom))
