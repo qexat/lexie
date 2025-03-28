@@ -1,0 +1,3 @@
+(library
+ (name clinic)
+ (libraries config custom tail))
