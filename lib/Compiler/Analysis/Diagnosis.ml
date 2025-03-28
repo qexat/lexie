@@ -1,4 +1,5 @@
 open Custom
+open Tail
 
 type type_mismatch =
   { expected : Kind.t

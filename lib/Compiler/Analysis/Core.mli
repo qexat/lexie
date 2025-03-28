@@ -1,5 +1,6 @@
 open Custom
 open Common
+open Tail
 module Context : Quickmap.TYPE with type key = Name.t with type value = Kind.t
 
 (* private API *)

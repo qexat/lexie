@@ -1,5 +1,5 @@
 open Custom
-open Analysis
+open Tail
 
 let id = Name.of_string_exn "id"
 let _T = Name.of_string_exn "T"
@@ -12,6 +12,6 @@ let program =
   [ Statement.let'
       id
       (Term.lambda (_T, Sort Sort.Type) (Term.lambda (x, Term (Var _T)) (Var x)))
-  ; Statement.print (Term.app2 (Term.var id) (Term.var _Nat) (Term.app (Var _S) (Var _O)))
+  ; Statement.print (Term.app2 (Term.var id) (Term.var _Nat) (Var _O))
   ]
 ;;

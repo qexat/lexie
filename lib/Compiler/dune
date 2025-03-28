@@ -1,3 +1,3 @@
 (library
  (name compiler)
- (libraries analysis batteries custom diagnostic nurse))
+ (libraries analysis batteries custom diagnostic tail))
