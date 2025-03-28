@@ -20,4 +20,4 @@ let compare =
 ;;
 
 let equal = fun left right -> compare left right = 0
-let binds_tighter = fun left ~than:right -> compare left right < 0
+let binds_tighter = fun left ~than:right -> compare left right <= 0
