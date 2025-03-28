@@ -73,6 +73,7 @@ and check_kind =
   | _, Term Hole ->
     Nurse.add_info (Diagnosis.Expected_type expected) nurse;
     true
+  | Term e_term, Term f_term -> check_term ~nurse ~expected:e_term f_term
   | _, _ -> false
 
 and check_sort =
