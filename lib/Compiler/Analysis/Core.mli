@@ -45,3 +45,4 @@ val check_statement
 
 val check_program : nurse:Nurse.t -> context:Context.t -> Program.t -> Context.t option
 val check : ?nurse:Nurse.t -> ?context:Context.t -> Program.t -> Context.t option
+val intrinsics : Context.t

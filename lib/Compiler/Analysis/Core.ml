@@ -181,3 +181,16 @@ let check =
   Nurse.set_diagnosis_renderer Diagnosis.render nurse;
   check_program ~nurse ~context program
 ;;
+
+let intrinsics =
+  let _Nat = Name.of_string_exn "Nat" in
+  let _Unit = Name.of_string_exn "Unit" in
+  let _O = Name.of_string_exn "O" in
+  let _S = Name.of_string_exn "S" in
+  let n = Name.of_string_exn "n" in
+  Context.empty
+  |> Context.add _Nat (Kind.sort Type)
+  |> Context.add _Unit (Kind.sort Type)
+  |> Context.add _O (Kind.term (Var _Nat))
+  |> Context.add _S (Kind.arrow (n, Kind.term (Var _Nat)) (Term (Var _Nat)))
+;;

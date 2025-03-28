@@ -1,7 +1,4 @@
-module type CONFIG = sig
-  val strict : bool
-  val print_program : bool
-end
+module type CONFIG = Check.CONFIG
 
 let exec =
   fun ~nurse:_ ~painter (module Config : CONFIG) program ->

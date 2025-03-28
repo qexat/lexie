@@ -9,6 +9,7 @@ module Painter = Painter.Make (struct
 module Config = struct
   let strict = true
   let print_program = true
+  let use_compiler_intrinsics = true
 end
 
 let check () =
