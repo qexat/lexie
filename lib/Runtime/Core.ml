@@ -71,8 +71,8 @@ let print_unreachable =
 ;;
 
 let evaluate =
-  fun ~painter program ->
-  let env = Environment.empty in
+  fun ~painter ?env program ->
+  let env = env or Environment.empty in
   match evaluate_program ~env ~painter program with
   | Ok _ -> 0
   | Error (Either.Left exn) ->
