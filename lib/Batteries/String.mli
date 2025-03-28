@@ -67,7 +67,3 @@ module type PREDICATE = sig
 end
 
 module Constrain : functor (_ : PREDICATE) -> REFINED
-
-(** [make_refined predicate] constructs a refined string type
-    which values are guaranteed to satisfy [predicate]. *)
-val make_refined : (string -> bool) -> (module REFINED)
