@@ -1,0 +1,3 @@
+(library
+ (name cli)
+ (libraries batteries hooks))

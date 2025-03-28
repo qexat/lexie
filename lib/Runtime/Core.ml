@@ -1,0 +1,84 @@
+open Batteries
+open Custom
+module Environment = Quickmap.Make (Name) (Object)
+
+let nat = Name.of_string_exn "Nat"
+let unit = Name.of_string_exn "Unit"
+
+let rec evaluate_term =
+  fun ~env term ->
+  let open Exception in
+  match (term : Analysis.Term.t) with
+  | App (func, arg) -> apply_term ~env func arg
+  | Fun (param, ret) -> Ok (Object.Fun (Analysis.Parameter.name param, Object.Late ret))
+  | Hole -> Error (Either.Left { kind = Exception.Incomplete_program })
+  | Primitive prim -> Ok (Object.Constant prim)
+  | Var name ->
+    (match Environment.get name env with
+     | Some obj -> Ok obj
+     | None -> Error (Either.Right (Unreachable.Undefined_name name)))
+
+and apply_term =
+  fun ~env func arg ->
+  let* func_object = evaluate_term ~env func in
+  let* _ = evaluate_term ~env arg in
+  match func_object with
+  | Fun (_, Late ret) ->
+    let* ret' = evaluate_term ~env ret in
+    Ok ret'
+  | Fun (_, ret) -> Ok ret
+  | _ -> Error (Either.Right Unreachable.Illegal_application)
+;;
+
+let evaluate_statement =
+  fun ~env ~painter stmt ->
+  match (stmt : Analysis.Statement.t) with
+  | Let (name, _, body) ->
+    let* body_object = evaluate_term ~env body in
+    Ok (Environment.add name body_object env)
+  | Print term ->
+    let* term_object = evaluate_term ~env term in
+    Printf.printf "%s\n" (Object.show painter term_object);
+    Ok env
+;;
+
+let rec evaluate_program =
+  fun ~env ~painter program ->
+  match program with
+  | [] -> Ok env
+  | first :: rest ->
+    let* env = evaluate_statement ~env ~painter first in
+    evaluate_program ~env ~painter rest
+;;
+
+let print_exception =
+  fun ~painter:(module Painter : Painter.TYPE) exn ->
+  let tag = Painter.paint_error "runtime error:" in
+  match (exn : Exception.t).kind with
+  | Incomplete_program ->
+    Printf.eprintf "%s %s\n" tag "this program is incomplete (hole found)"
+;;
+
+let print_unreachable =
+  fun ~painter:(module Painter : Painter.TYPE) unreachable ->
+  let tag = Painter.paint_error "internal error:" in
+  let tag_ext = Painter.paint_info "unreachable:" in
+  (match (unreachable : Unreachable.t) with
+   | Illegal_application -> "illegal application"
+   | Undefined_name name ->
+     Printf.sprintf "undefined name %s" (Name.show (module Painter) name))
+  |> Printf.eprintf "%s %s %s\n" tag tag_ext
+;;
+
+let evaluate =
+  fun ~painter program ->
+  let env = Environment.empty in
+  match evaluate_program ~env ~painter program with
+  | Ok _ -> 0
+  | Error (Either.Left exn) ->
+    print_exception ~painter exn;
+    1
+  | Error (Either.Right unreachable) ->
+    print_unreachable ~painter unreachable;
+    126
+;;

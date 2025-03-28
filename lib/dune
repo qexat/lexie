@@ -1,0 +1,3 @@
+(library
+ (name lexie)
+ (libraries batteries cli compiler custom hooks runtime))

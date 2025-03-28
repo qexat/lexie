@@ -1,0 +1,3 @@
+(library
+ (name nurse)
+ (libraries custom diagnostic))
