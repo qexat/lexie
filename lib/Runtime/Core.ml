@@ -21,10 +21,10 @@ let rec evaluate_term =
 and apply_term =
   fun ~env func arg ->
   let* func_object = evaluate_term ~env func in
-  let* _ = evaluate_term ~env arg in
+  let* arg_object = evaluate_term ~env arg in
   match func_object with
-  | Fun (_, Late ret) ->
-    let* ret' = evaluate_term ~env ret in
+  | Fun (param, Late ret) ->
+    let* ret' = evaluate_term ~env:(Environment.add param arg_object env) ret in
     Ok ret'
   | Fun (_, ret) -> Ok ret
   | _ -> Error (Either.Right Unreachable.Illegal_application)
