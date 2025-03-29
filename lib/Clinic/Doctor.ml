@@ -43,3 +43,25 @@ let review =
   in
   { decision; details }
 ;;
+
+let emit_single_diagnostic =
+  fun painter config diagnostic ->
+  let doctor = create config in
+  add_diagnostic diagnostic doctor;
+  review painter doctor
+;;
+
+let emit_single_error =
+  fun painter config diagnosis ->
+  emit_single_diagnostic painter config { category = Error; diagnosis }
+;;
+
+let emit_single_warning =
+  fun painter config diagnosis ->
+  emit_single_diagnostic painter config { category = Warning; diagnosis }
+;;
+
+let emit_single_info =
+  fun painter config diagnosis ->
+  emit_single_diagnostic painter config { category = Info; diagnosis }
+;;
