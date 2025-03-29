@@ -35,16 +35,20 @@ and show_term =
   let module Painter = (val painter : Painter.TYPE) in
   match term with
   | App (func, arg) ->
+    let func, args = uncurry_application func in
     Printf.sprintf
       "%s %s"
       (show_term_considering_precedence painter func ~parent:term)
-      (show_term_considering_precedence painter arg ~parent:term)
-  | Fun (param, body) ->
+      (args ++ [ arg ]
+       |> List.map (show_term_considering_precedence painter ~parent:term)
+       |> String.concat " ")
+  | Fun (param, ret) ->
+    let params, ret = uncurry_function ret in
     Printf.sprintf
       "%s %s -> %s"
       (Painter.paint_keyword "fun")
-      (show_parameter painter param)
-      (show_term_considering_precedence painter body ~parent:term)
+      (param :: params |> List.map (show_parameter painter) |> String.concat " ")
+      (show_term_considering_precedence painter ret ~parent:term)
   | Hole -> Painter.paint_hole "_"
   | Primitive prim -> Primitive.show (module Painter) prim
   | Var name -> Name.show (module Painter) name
@@ -63,4 +67,20 @@ and show_term_considering_precedence =
 and show_parameter =
   fun painter (name, kind) ->
   Printf.sprintf "(%s : %s)" (Name.show painter name) (show_kind painter kind)
+
+and uncurry_function =
+  fun term ->
+  match term with
+  | Fun (param, ret) ->
+    let rest, inner_ret = uncurry_function ret in
+    param :: rest, inner_ret
+  | _ -> [], term
+
+and uncurry_application =
+  fun func ->
+  match func with
+  | App (func', last_arg) ->
+    let inner_func, args = uncurry_application func' in
+    inner_func, args ++ [ last_arg ]
+  | _ -> func, []
 ;;
