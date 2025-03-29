@@ -36,17 +36,11 @@ let rec infer_kind_of_kind =
   fun ~doctor ~context kind ->
   let open Lang in
   match kind with
-  | Arrow ((name, kind), ret) -> infer_kind_of_arrow ~doctor ~context (name, kind) ret
+  | Arrow _ -> Some (Sort Type)
   | Sort sort ->
     let+ sort_sort = infer_sort_of_sort ~doctor ~context sort in
     Some (Sort sort_sort)
   | Term term -> infer_kind_of_term ~doctor ~context term
-
-and infer_kind_of_arrow =
-  fun ~doctor ~context (name, kind) ret ->
-  let+ param_kind = infer_kind_of_kind ~doctor ~context kind in
-  let+ ret_kind = infer_kind_of_kind ~doctor ~context ret in
-  Some (Lang.Arrow ((name, param_kind), ret_kind))
 
 and infer_kind_of_term =
   fun ~doctor ~context term ->

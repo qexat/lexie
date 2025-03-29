@@ -12,14 +12,6 @@ val propagate_parameter : Parameter.t -> Kind.t -> Kind.t
 (* public API *)
 val infer_sort_of_sort : doctor:Doctor.t -> context:Context.t -> Sort.t -> Sort.t option
 val infer_kind_of_kind : doctor:Doctor.t -> context:Context.t -> Kind.t -> Kind.t option
-
-val infer_kind_of_arrow
-  :  doctor:Doctor.t
-  -> context:Context.t
-  -> Parameter.t
-  -> Kind.t
-  -> Kind.t option
-
 val infer_kind_of_term : doctor:Doctor.t -> context:Context.t -> Term.t -> Kind.t option
 
 val infer_kind_of_primitive
