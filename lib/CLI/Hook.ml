@@ -9,12 +9,6 @@ let config : Config.t =
   { strict = true; print_program = true; use_compiler_intrinsics = true }
 ;;
 
-module Config = struct
-  let strict = true
-  let print_program = true
-  let use_compiler_intrinsics = true
-end
-
 let doctor = Doctor.create config
 
 let check () =
