@@ -25,17 +25,17 @@ type review =
   }
 
 let make_decision =
-  fun doctor ->
+  fun ~strict diagnostics ->
   if
-    List.exists Diagnostic.is_error doctor.diagnostics
-    || (doctor.config.strict && List.exists Diagnostic.is_warning doctor.diagnostics)
+    List.exists Diagnostic.is_error diagnostics
+    || (strict && List.exists Diagnostic.is_warning diagnostics)
   then Abort
   else Pass
 ;;
 
 let review =
   fun painter doctor ->
-  let decision = make_decision doctor in
+  let decision = make_decision ~strict:doctor.config.strict doctor.diagnostics in
   let details =
     doctor.diagnostics
     |> List.map_on_cons (Diagnostic.show painter)
