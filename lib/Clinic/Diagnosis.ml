@@ -17,6 +17,7 @@ type t =
   | Hole_found
   | Name_not_found of Name.t
   | Non_functional_application of term_info
+  | Unsupported_intrinsics_at_runtime
 
 let show =
   fun painter diagnosis ->
@@ -42,4 +43,7 @@ let show =
       "the term %s (of type %s) is not a function, it cannot be applied"
       (Tail.Term.show painter term)
       (Tail.Kind.show painter kind)
+  | Unsupported_intrinsics_at_runtime ->
+    "compiler intrinsics are not fully supported by the runtime and may cause unexpected \
+     crashes"
 ;;
