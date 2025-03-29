@@ -38,6 +38,7 @@ let review =
   let decision = make_decision ~strict:doctor.config.strict doctor.diagnostics in
   let details =
     doctor.diagnostics
+    |> List.rev
     |> List.map_on_cons (Diagnostic.show painter)
     |> Option.map (String.concat "\n")
   in
