@@ -66,7 +66,7 @@ let print_unreachable =
 ;;
 
 let evaluate =
-  fun ~painter ?env program ->
+  fun ?env ~painter program ->
   let env = env or Environment.empty in
   match evaluate_program ~env ~painter program with
   | Ok _ -> 0
