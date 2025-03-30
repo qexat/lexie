@@ -2,9 +2,6 @@ open Batteries
 open Custom
 module Environment = Quickmap.Make (Name) (Object)
 
-let nat = Name.of_string_exn "Nat"
-let unit = Name.of_string_exn "Unit"
-
 let rec evaluate_term =
   fun ~env term ->
   let open Exception in
