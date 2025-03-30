@@ -58,14 +58,11 @@ let print_exception =
 ;;
 
 let print_unreachable =
-  fun ~painter:(module Painter : Painter.TYPE) unreachable ->
+  fun ~painter unreachable ->
+  let module Painter = (val painter : Painter.TYPE) in
   let tag = Painter.paint_error "internal error:" in
   let tag_ext = Painter.paint_info "unreachable:" in
-  (match (unreachable : Unreachable.t) with
-   | Illegal_application -> "illegal application"
-   | Undefined_name name ->
-     Printf.sprintf "undefined name %s" (Name.show (module Painter) name))
-  |> Printf.eprintf "%s %s %s\n" tag tag_ext
+  Printf.eprintf "%s %s %s\n" tag tag_ext (Unreachable.show painter unreachable)
 ;;
 
 let evaluate =
