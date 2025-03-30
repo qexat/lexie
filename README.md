@@ -11,3 +11,9 @@ for now there is no parser whatsoever so the sample program is hardcoded in `CLI
 ```sh
 dune exec lexie
 ```
+
+---
+
+Lexie's development does not involve any large language model.
+
+[![Lexie is entirely brain-made.](https://brainmade.org/black-logo.svg)](https://brainmade.org)
