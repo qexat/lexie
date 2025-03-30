@@ -49,11 +49,12 @@ let rec evaluate_program =
 ;;
 
 let print_exception =
-  fun ~painter:(module Painter : Painter.TYPE) exn ->
-  let tag = Painter.paint_error "runtime error:" in
-  match (exn : Exception.t).kind with
-  | Incomplete_program ->
-    Printf.eprintf "%s %s\n" tag "this program is incomplete (hole found)"
+  fun ~painter exn ->
+  let module Painter = (val painter : Painter.TYPE) in
+  Printf.eprintf
+    "%s %s\n"
+    (Painter.paint_error "runtime error:")
+    (Exception.show painter exn)
 ;;
 
 let print_unreachable =
