@@ -162,7 +162,7 @@ let check_statement =
 ;;
 
 let rec check_program =
-  fun ~doctor ~context program ->
+  fun ~doctor ?(context = Context.empty) program ->
   match program with
   | [] -> Some context
   | first :: rest ->

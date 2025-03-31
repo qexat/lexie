@@ -37,6 +37,6 @@ val check_statement
   -> Statement.t
   -> Context.t option
 
-val check_program : doctor:Doctor.t -> context:Context.t -> Program.t -> Context.t option
 val check : doctor:Doctor.t -> ?context:Context.t -> Program.t -> Context.t option
+val check_program : doctor:Doctor.t -> ?context:Context.t -> Program.t -> Context.t option
 val intrinsics : Context.t
