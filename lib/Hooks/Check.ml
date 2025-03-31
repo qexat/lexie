@@ -7,7 +7,7 @@ let exec =
   let context =
     if config.use_compiler_intrinsics then Some Analysis.Core.intrinsics else None
   in
-  let _ = Analysis.Core.check ~doctor ?context program in
+  let _ = Analysis.Core.check_program ~doctor ?context program in
   let review = Doctor.review painter doctor in
   Option.iter (Printf.eprintf "%s\n") review.details;
   match review.decision with

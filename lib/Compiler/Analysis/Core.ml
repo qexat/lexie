@@ -170,12 +170,6 @@ let rec check_program =
     check_program ~doctor ~context rest
 ;;
 
-let check =
-  fun ~doctor ?context program ->
-  let context = context or Context.empty in
-  check_program ~doctor ~context program
-;;
-
 let intrinsics =
   let _Nat = Name.of_string_exn "Nat" in
   let _Unit = Name.of_string_exn "Unit" in
