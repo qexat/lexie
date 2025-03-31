@@ -2,8 +2,8 @@ module type SHOWABLE = sig
   (** The showable type. *)
   type t
 
-  (** [show value] produces a pretty-printable string
-      representing the [value]. *)
+  (** [show painter value] produces a pretty-printable
+      represention of the [value] using the [painter]. *)
   val show : (module Painter.TYPE) -> t -> string
 end
 
@@ -42,8 +42,8 @@ module type TYPE = sig
       containing the entries of the two. *)
   val concat : t -> t -> t
 
-  (** [show mapping] returns a pretty-printable string
-      representing the [mapping]. *)
+  (** [show painter mapping] returns a pretty-printable
+      representation of the [mapping] using the [painter]. *)
   val show : (module Painter.TYPE) -> t -> string
 end
 
