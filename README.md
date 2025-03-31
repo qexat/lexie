@@ -1,3 +1,7 @@
+<!-- markdownlint-disable MD041 -->
+
+![Logo of Lexie](./assets/banner.png)
+
 # lexie
 
 a ML-style programming language based on the calculus of inductive constructions type theory
