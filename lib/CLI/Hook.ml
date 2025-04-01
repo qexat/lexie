@@ -5,8 +5,8 @@ module Painter = Painter.Make (struct
     let show_styling = `Auto
   end)
 
-let config : Config.t =
-  { strict = true; print_program = true; use_compiler_intrinsics = true }
+let config =
+  Config.create ~strict:true ~print_program:true ~use_compiler_intrinsics:true ()
 ;;
 
 let doctor = Doctor.create config
