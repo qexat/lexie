@@ -17,4 +17,7 @@
  (name lexie)
  (synopsis "a ML-style, CIC-based programming language")
  (description "i'll put something here later")
- (depends ocaml))
+ (depends
+  ocaml
+  (cmdliner
+   (>= 1.3.0))))

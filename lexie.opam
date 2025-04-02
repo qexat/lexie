@@ -10,6 +10,7 @@ bug-reports: "https://github.com/qexat/lexie/issues"
 depends: [
   "dune" {>= "3.17"}
   "ocaml"
+  "cmdliner" {>= "1.3.0"}
   "odoc" {with-doc}
 ]
 build: [
