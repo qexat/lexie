@@ -38,7 +38,7 @@ let arrow3 =
 let app3 = fun x y z -> Term.app (Term.app2 x y z)
 let app4 = fun x y z a -> Term.app (app3 x y z a)
 
-let program =
+let faulty_program =
   [ Statement.let'
       hummingbird
       (lambda6
@@ -71,9 +71,15 @@ let program =
             (Var _B)
             (Var _C)
             (app3 (Var vireo) (Var _A) (Var _B) (Var _C))))
-  ; Statement.let'
+  ]
+;;
+
+let working_program =
+  [ Statement.let'
       id
       (Term.lambda (_T, Sort Sort.Type) (Term.lambda (x, Term (Var _T)) (Var x)))
   ; Statement.print (Term.app2 (Term.var id) (Term.var _Nat) (Var _O))
   ]
 ;;
+
+let program = working_program
