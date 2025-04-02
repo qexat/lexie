@@ -5,7 +5,8 @@ let warn_about_compiler_intrinsics =
   let review =
     Doctor.emit_single_warning painter config Diagnosis.Unsupported_intrinsics_at_runtime
   in
-  Option.iter (Printf.eprintf "%s\n") review.details
+  Option.iter (Printf.eprintf "%s\n") review.details;
+  Out_channel.flush stderr
 ;;
 
 let execute =
