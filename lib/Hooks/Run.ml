@@ -1,1 +1,1 @@
-let exec = Hook.compose Check.exec Eval.exec
+let execute = Hook.compose Check.execute Eval.execute

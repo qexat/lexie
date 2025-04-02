@@ -3,8 +3,20 @@ open Custom
 (** A doctor manages diagnostics. *)
 type t
 
+module Config : sig
+  type t = { strict : bool }
+
+  (** [create ?strict ()] creates a clinic configuration without
+        having to specify all fields, providing good defaults. *)
+  val create : ?strict:bool -> unit -> t
+end
+
 (** [create config] creates a new doctor given a [config]. *)
 val create : Config.t -> t
+
+(** [get_config doctor] returns the config that was used to
+    create the [doctor]. *)
+val get_config : t -> Config.t
 
 (** [add_diagnostic diagnostic doctor] adds the [diagnostic] to
     the [doctor] documents. *)

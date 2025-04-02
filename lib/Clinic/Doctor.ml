@@ -1,11 +1,18 @@
 open Batteries
 
+module Config = struct
+  type t = { strict : bool }
+
+  let create = fun ?(strict = false) () -> { strict }
+end
+
 type t =
   { config : Config.t
   ; mutable diagnostics : Diagnostic.t list
   }
 
 let create = fun config -> { config; diagnostics = [] }
+let get_config = fun { config; _ } -> config
 
 let add_diagnostic =
   fun diagnostic doctor -> doctor.diagnostics <- diagnostic :: doctor.diagnostics

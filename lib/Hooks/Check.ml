@@ -1,6 +1,6 @@
 open Clinic
 
-let exec =
+let execute =
   fun ~doctor ~painter (config : Config.t) program ->
   if config.print_program
   then Printf.printf "%s\n---\n" (Tail.Program.show painter program);

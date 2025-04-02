@@ -8,12 +8,12 @@ let warn_about_compiler_intrinsics =
   Option.iter (Printf.eprintf "%s\n") review.details
 ;;
 
-let exec =
-  fun ~doctor:_ ~painter (config : Config.t) program ->
+let execute =
+  fun ~doctor ~painter (config : Config.t) program ->
   let env =
     if config.use_compiler_intrinsics
     then (
-      warn_about_compiler_intrinsics painter config;
+      warn_about_compiler_intrinsics painter (Doctor.get_config doctor);
       Some Runtime.Core.intrinsics)
     else None
   in

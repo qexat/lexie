@@ -1,8 +1,8 @@
 open Custom
 open Clinic
 
-(** [exec doctor painter config program] executes the hook. *)
-val exec
+(** [execute doctor painter config program] executes the hook. *)
+val execute
   :  doctor:Doctor.t
   -> painter:(module Painter.TYPE)
   -> Config.t
