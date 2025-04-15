@@ -1,7 +1,7 @@
 type t = Lang.task
 
 (** [return term] creates a new [Done] task with the [term]. *)
-val return : Term.t -> t
+val return : Kind.t -> t
 
 (** [future syntax kind] creates a new [Future] task on the
     non-terminating [syntax] of the provided [kind]. *)
