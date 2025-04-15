@@ -40,6 +40,7 @@ let rec infer_kind_of_kind =
   | Sort sort ->
     let+ sort_sort = infer_sort_of_sort ~doctor ~context sort in
     Some (Sort sort_sort)
+  | Task task -> infer_kind_of_task ~doctor ~context task
   | Term term -> infer_kind_of_term ~doctor ~context term
 
 and infer_kind_of_term =
@@ -58,6 +59,13 @@ and infer_kind_of_term =
     Some (Term Hole)
   | Primitive prim -> infer_kind_of_primitive ~doctor ~context prim
   | Var name -> fetch_term ~doctor ~context name
+
+and infer_kind_of_task =
+  fun ~doctor ~context task ->
+  let open Lang in
+  match task with
+  | Done term -> infer_kind_of_term ~doctor ~context term
+  | Future (_, kind) -> Some kind
 
 and check_kind =
   fun ~doctor ~expected found ->
@@ -128,6 +136,10 @@ and propagate_parameter =
   | Arrow (Named (name, kind), ret) ->
     Kind.arrow (Named (name, propagate kind)) (propagate ret)
   | Sort _ -> rest
+  | Task task ->
+    (match task with
+     | Done term -> propagate (Term term)
+     | Future (syntactic, kind) -> Task (Future (syntactic, propagate kind)))
   | Term term ->
     (match term with
      | Fun (Named (param_name', param_kind'), ret') ->

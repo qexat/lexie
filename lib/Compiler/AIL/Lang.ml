@@ -5,6 +5,7 @@ open Common
 type kind =
   | Arrow of parameter * kind
   | Sort of Sort.t
+  | Task of task
   | Term of term
 
 and term =
@@ -15,6 +16,10 @@ and term =
   | Var of Name.t
 
 and parameter = Named of Name.t * kind
+
+and task =
+  | Done of term
+  | Future of (string * kind)
 
 let term_to_syntactic_kind = function
   | App _ -> Syntactic_kind.App
@@ -28,6 +33,7 @@ let rec show_kind =
   | Arrow (param, ret) ->
     Printf.sprintf "%s -> %s" (show_parameter painter param) (show_kind painter ret)
   | Sort sort -> Sort.show painter sort
+  | Task task -> show_task painter task
   | Term term -> show_term painter term
 
 and show_term =
@@ -69,6 +75,19 @@ and show_parameter =
   match parameter with
   | Named (name, kind) ->
     Printf.sprintf "(%s : %s)" (Name.show painter name) (show_kind painter kind)
+
+and show_task =
+  fun painter (task : task) ->
+  let module Painter = (val painter : Painter.TYPE) in
+  match task with
+  | Done term ->
+    Printf.sprintf "(%s %s)" (Painter.paint_keyword "done") (show_term painter term)
+  | Future (syntactic, kind) ->
+    Printf.sprintf
+      "(%s '%s' of kind %s)"
+      (Painter.paint_keyword "future")
+      (String.escaped syntactic)
+      (show_kind painter kind)
 
 and uncurry_function =
   fun term ->
