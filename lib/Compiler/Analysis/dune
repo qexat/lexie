@@ -1,3 +1,3 @@
 (library
  (name analysis)
- (libraries clinic common custom tail))
+ (libraries ail clinic common custom))

@@ -6,5 +6,5 @@ val execute
   :  doctor:Doctor.t
   -> painter:(module Painter.TYPE)
   -> Config.t
-  -> Tail.Program.t
-  -> Tail.Program.t option
+  -> Ail.Program.t
+  -> Ail.Program.t option

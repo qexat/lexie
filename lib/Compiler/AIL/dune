@@ -1,0 +1,5 @@
+; Analysis Intermediate Language
+
+(library
+ (name ail)
+ (libraries common custom))

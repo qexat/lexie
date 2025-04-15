@@ -3,7 +3,7 @@ open Clinic
 let execute =
   fun ~doctor ~painter (config : Config.t) program ->
   if config.print_program
-  then Printf.printf "%s\n---\n" (Tail.Program.show painter program);
+  then Printf.printf "%s\n---\n" (Ail.Program.show painter program);
   let context =
     if config.use_compiler_intrinsics then Some Analysis.Core.intrinsics else None
   in
