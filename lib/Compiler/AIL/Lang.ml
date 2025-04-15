@@ -14,7 +14,7 @@ and term =
   | Primitive of Primitive.t
   | Var of Name.t
 
-and parameter = Name.t * kind
+and parameter = Named of Name.t * kind
 
 let term_to_syntactic_kind = function
   | App _ -> Syntactic_kind.App
@@ -65,8 +65,10 @@ and show_term_considering_precedence =
   else repr
 
 and show_parameter =
-  fun painter (name, kind) ->
-  Printf.sprintf "(%s : %s)" (Name.show painter name) (show_kind painter kind)
+  fun painter parameter ->
+  match parameter with
+  | Named (name, kind) ->
+    Printf.sprintf "(%s : %s)" (Name.show painter name) (show_kind painter kind)
 
 and uncurry_function =
   fun term ->

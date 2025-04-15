@@ -29,7 +29,7 @@ let infer_kind_of_primitive =
 let infer_kind_of_parameter =
   fun ~doctor:_ ~context:_ parameter ->
   match parameter with
-  | _, kind -> Some kind
+  | Lang.Named (_, kind) -> Some kind
 ;;
 
 let rec infer_kind_of_kind =
@@ -47,12 +47,12 @@ and infer_kind_of_term =
   let open Lang in
   match term with
   | App (func, arg) -> try_apply ~doctor ~context func arg
-  | Fun (((name, kind) as param), ret) ->
+  | Fun ((Named (name, kind) as param), ret) ->
     let+ param_kind = infer_kind_of_parameter ~doctor ~context param in
     let+ ret_kind =
       infer_kind_of_term ~doctor ~context:(Context.add name kind context) ret
     in
-    Some (Arrow ((name, param_kind), ret_kind))
+    Some (Arrow (Named (name, param_kind), ret_kind))
   | Hole ->
     Doctor.add_warning Diagnosis.Hole_found doctor;
     Some (Term Hole)
@@ -62,7 +62,7 @@ and infer_kind_of_term =
 and check_kind =
   fun ~doctor ~expected found ->
   match ((expected, found) : Kind.t * Kind.t) with
-  | Arrow ((_, e_kind), e_ret), Arrow ((_, f_kind), f_ret) ->
+  | Arrow (Named (_, e_kind), e_ret), Arrow (Named (_, f_kind), f_ret) ->
     check_kind ~doctor ~expected:e_kind f_kind && check_kind ~doctor ~expected:e_ret f_ret
   | Sort e_sort, Sort f_sort -> check_sort ~doctor ~expected:e_sort f_sort
   | Term Hole, _ -> true
@@ -98,14 +98,14 @@ and check_term =
 and check_parameter =
   fun ~doctor ~expected found ->
   match expected, found with
-  | (_, e_kind), (_, f_kind) -> check_kind ~doctor ~expected:e_kind f_kind
+  | Named (_, e_kind), Named (_, f_kind) -> check_kind ~doctor ~expected:e_kind f_kind
 
 and try_apply =
   fun ~doctor ~context func arg ->
   let+ func_kind = infer_kind_of_term ~doctor ~context func in
   let+ arg_kind = infer_kind_of_term ~doctor ~context arg in
   match (func_kind : Kind.t) with
-  | Arrow ((name, kind), ret) ->
+  | Arrow (Named (name, kind), ret) ->
     (match check_kind ~doctor ~expected:kind arg_kind with
      | false ->
        Doctor.add_error
@@ -125,12 +125,13 @@ and propagate_parameter =
   fun (param_name, param_kind) rest ->
   let propagate = propagate_parameter (param_name, param_kind) in
   match rest with
-  | Arrow ((name, kind), ret) -> Kind.arrow (name, propagate kind) (propagate ret)
+  | Arrow (Named (name, kind), ret) ->
+    Kind.arrow (Named (name, propagate kind)) (propagate ret)
   | Sort _ -> rest
   | Term term ->
     (match term with
-     | Fun ((param_name', param_kind'), ret') ->
-       Kind.term (Term.lambda (param_name', propagate param_kind') ret')
+     | Fun (Named (param_name', param_kind'), ret') ->
+       Kind.term (Term.lambda (Named (param_name', propagate param_kind')) ret')
      | Var name when Name.equal name param_name -> param_kind
      | _ -> Kind.term term)
 ;;
@@ -180,5 +181,5 @@ let intrinsics =
   |> Context.add _Nat (Kind.sort Type)
   |> Context.add _Unit (Kind.sort Type)
   |> Context.add _O (Kind.term (Var _Nat))
-  |> Context.add _S (Kind.arrow (n, Kind.term (Var _Nat)) (Term (Var _Nat)))
+  |> Context.add _S (Kind.arrow (Named (n, Kind.term (Var _Nat))) (Term (Var _Nat)))
 ;;

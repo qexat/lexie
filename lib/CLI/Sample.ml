@@ -28,11 +28,15 @@ let lambda6 =
   lambda3 param1 param2 param3 (lambda3 param4 param5 param6 ret)
 ;;
 
-let arrow2 = fun param1 param2 ret -> Kind.arrow (a, param1) (Arrow ((b, param2), ret))
+let arrow2 =
+  fun param1 param2 ret -> Kind.arrow (Named (a, param1)) (Arrow (Named (b, param2), ret))
+;;
 
 let arrow3 =
   fun param1 param2 param3 ret ->
-  Kind.arrow (a, param1) (Arrow ((b, param2), Arrow ((c, param3), ret)))
+  Kind.arrow
+    (Named (a, param1))
+    (Arrow (Named (b, param2), Arrow (Named (c, param3), ret)))
 ;;
 
 let app3 = fun x y z -> Term.app (Term.app2 x y z)
@@ -42,29 +46,29 @@ let faulty_program =
   [ Statement.let'
       hummingbird
       (lambda6
-         (_A, Sort Sort.Type)
-         (_B, Sort Sort.Type)
-         (_C, Sort Sort.Type)
-         (a, arrow3 (Term (Var _B)) (Term (Var _C)) (Term (Var _B)) (Term (Var _A)))
-         (b, Term (Var _B))
-         (c, Term (Var _C))
+         (Named (_A, Sort Sort.Type))
+         (Named (_B, Sort Sort.Type))
+         (Named (_C, Sort Sort.Type))
+         (Named (a, arrow3 (Term (Var _B)) (Term (Var _C)) (Term (Var _B)) (Term (Var _A))))
+         (Named (b, Term (Var _B)))
+         (Named (c, Term (Var _C)))
          (app3 (Var a) (Var b) (Var c) (Var b)))
   ; Statement.let'
       vireo
       (lambda6
-         (_A, Sort Sort.Type)
-         (_B, Sort Sort.Type)
-         (_C, Sort Sort.Type)
-         (a, Term (Var _A))
-         (b, Term (Var _B))
-         (c, arrow2 (Term (Var _A)) (Term (Var _B)) (Term (Var _C)))
+         (Named (_A, Sort Sort.Type))
+         (Named (_B, Sort Sort.Type))
+         (Named (_C, Sort Sort.Type))
+         (Named (a, Term (Var _A)))
+         (Named (b, Term (Var _B)))
+         (Named (c, arrow2 (Term (Var _A)) (Term (Var _B)) (Term (Var _C))))
          (Term.app2 (Var c) (Var a) (Var b)))
   ; Statement.let'
       delta
       (lambda3
-         (_A, Sort Sort.Type)
-         (_B, Sort Sort.Type)
-         (_C, Sort Sort.Type)
+         (Named (_A, Sort Sort.Type))
+         (Named (_B, Sort Sort.Type))
+         (Named (_C, Sort Sort.Type))
          (app4
             (Var hummingbird)
             (Var _A)
@@ -77,7 +81,9 @@ let faulty_program =
 let working_program =
   [ Statement.let'
       id
-      (Term.lambda (_T, Sort Sort.Type) (Term.lambda (x, Term (Var _T)) (Var x)))
+      (Term.lambda
+         (Named (_T, Sort Sort.Type))
+         (Term.lambda (Named (x, Term (Var _T))) (Var x)))
   ; Statement.print (Term.app2 (Term.var id) (Term.var _Nat) (Var _O))
   ]
 ;;
