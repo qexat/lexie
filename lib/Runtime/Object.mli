@@ -5,7 +5,7 @@ open Common
 type t =
   | Constant of Primitive.t
   | Fun of Name.t * t
-  | Late of Ail.Term.t
+  | Late of AIL.Term.t
 
 (** [show painter obj] produces a pretty-printable
     representation of [obj] using the [painter]. *)

@@ -1,7 +1,7 @@
 open Custom
 open Clinic
 open Common
-open Ail
+open AIL
 module Context : Quickmap.TYPE with type key = Name.t with type value = Kind.t
 
 (** [infer_sort_of_sort ~doctor ~context sort] infers the sort

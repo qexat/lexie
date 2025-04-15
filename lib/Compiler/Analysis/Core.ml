@@ -2,7 +2,7 @@ open Batteries
 open Custom
 open Clinic
 open Common
-open Ail
+open AIL
 module Context = Quickmap.Make (Name) (Kind)
 
 let nat = Name.of_string_exn "Nat"

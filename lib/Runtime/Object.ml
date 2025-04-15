@@ -4,7 +4,7 @@ open Common
 type t =
   | Constant of Primitive.t
   | Fun of Name.t * t
-  | Late of Ail.Term.t
+  | Late of AIL.Term.t
 
 let rec show =
   fun painter obj ->

@@ -5,9 +5,9 @@ module Environment = Quickmap.Make (Name) (Object)
 let rec evaluate_term =
   fun ~env term ->
   let open Exception in
-  match (term : Ail.Term.t) with
+  match (term : AIL.Term.t) with
   | App (func, arg) -> apply_term ~env func arg
-  | Fun (param, ret) -> Ok (Object.Fun (Ail.Parameter.name param, Object.Late ret))
+  | Fun (param, ret) -> Ok (Object.Fun (AIL.Parameter.name param, Object.Late ret))
   | Hole -> Error (Either.Left { kind = Exception.Incomplete_program })
   | Primitive prim -> Ok (Object.Constant prim)
   | Var name ->
@@ -29,7 +29,7 @@ and apply_term =
 
 let evaluate_statement =
   fun ~env ~painter stmt ->
-  match (stmt : Ail.Statement.t) with
+  match (stmt : AIL.Statement.t) with
   | Let (name, _, body) ->
     let* body_object = evaluate_term ~env body in
     Ok (Environment.add name body_object env)

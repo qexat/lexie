@@ -1,3 +1,3 @@
 (library
  (name hooks)
- (libraries ail analysis custom runtime))
+ (libraries AIL analysis custom runtime))
