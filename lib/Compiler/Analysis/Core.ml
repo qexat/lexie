@@ -113,7 +113,7 @@ and try_apply =
          doctor;
        None
      | true ->
-       let right = propagate_parameter (name, Kind.term arg) ret in
+       let right = propagate_parameter (Lang.Named (name, Kind.term arg)) ret in
        Some right)
   | _ ->
     Doctor.add_error
@@ -122,8 +122,8 @@ and try_apply =
     None
 
 and propagate_parameter =
-  fun (param_name, param_kind) rest ->
-  let propagate = propagate_parameter (param_name, param_kind) in
+  fun (Named (param_name, param_kind)) rest ->
+  let propagate = propagate_parameter (Named (param_name, param_kind)) in
   match rest with
   | Arrow (Named (name, kind), ret) ->
     Kind.arrow (Named (name, propagate kind)) (propagate ret)
