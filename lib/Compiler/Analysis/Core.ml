@@ -61,10 +61,10 @@ and infer_kind_of_term =
   | Var name -> fetch_term ~doctor ~context name
 
 and infer_kind_of_task =
-  fun ~doctor:_ ~context:_ task ->
+  fun ~doctor ~context task ->
   let open Lang in
   match task with
-  | Done kind -> Some kind
+  | Done term -> infer_kind_of_term ~doctor ~context term
   | Future (_, kind) -> Some kind
 
 and check_kind =
@@ -138,7 +138,7 @@ and propagate_parameter =
   | Sort _ -> rest
   | Task task ->
     (match task with
-     | Done kind -> Task (Done (propagate kind))
+     | Done term -> propagate (Term term)
      | Future (syntactic, kind) -> Task (Future (syntactic, propagate kind)))
   | Term term ->
     (match term with

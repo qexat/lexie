@@ -18,7 +18,7 @@ and term =
 and parameter = Named of Name.t * kind
 
 and task =
-  | Done of kind
+  | Done of term
   | Future of (string * kind)
 
 let term_to_syntactic_kind = function
@@ -81,7 +81,7 @@ and show_task =
   let module Painter = (val painter : Painter.TYPE) in
   match task with
   | Done term ->
-    Printf.sprintf "(%s %s)" (Painter.paint_keyword "done") (show_kind painter term)
+    Printf.sprintf "(%s %s)" (Painter.paint_keyword "done") (show_term painter term)
   | Future (syntactic, kind) ->
     Printf.sprintf
       "(%s '%s' of kind %s)"
