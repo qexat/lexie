@@ -4,10 +4,9 @@ open Common
 open AIL
 module Context : Quickmap.TYPE with type key = Name.t with type value = Kind.t
 
-(** [infer_sort_of_sort ~doctor ~context sort] infers the sort
-    of [sort] given a [context].
+(** [infer_sort_of_sort sort] infers the sort of [sort].
     Returns [None] if it fails to do so. *)
-val infer_sort_of_sort : doctor:Doctor.t -> context:Context.t -> Sort.t -> Sort.t option
+val infer_sort_of_sort : Sort.t -> Sort.t option
 
 (** [infer_kind_of_kind ~doctor ~context kind] infers the kind
     of [kind] given a [context].
@@ -19,31 +18,23 @@ val infer_kind_of_kind : doctor:Doctor.t -> context:Context.t -> Kind.t -> Kind.
     Returns [None] if it fails to do so. *)
 val infer_kind_of_term : doctor:Doctor.t -> context:Context.t -> Term.t -> Kind.t option
 
-(** [infer_kind_of_primitive ~doctor ~context primitive] infers
-    the kind of [primitive] given a [context].
+(** [infer_kind_of_primitive primitive] infers the kind of
+    [primitive] given a [context].
     Returns [None] if it fails to do so. *)
-val infer_kind_of_primitive
-  :  doctor:Doctor.t
-  -> context:Context.t
-  -> Primitive.t
-  -> Kind.t option
+val infer_kind_of_primitive : Primitive.t -> Kind.t option
 
-(** [infer_kind_of_parameter ~doctor ~context parameter] infers
-    the kind of [parameter] given a [context].
+(** [infer_kind_of_parameterparameter] infers the kind of
+    [parameter] given a [context].
     Returns [None] if it fails to do so. *)
-val infer_kind_of_parameter
-  :  doctor:Doctor.t
-  -> context:Context.t
-  -> Parameter.t
-  -> Kind.t option
+val infer_kind_of_parameter : Parameter.t -> Kind.t option
 
 (** [check_kind ~doctor ~expected found] determines whether the
     kind [found] is compatible with the [expected] one. *)
 val check_kind : doctor:Doctor.t -> expected:Kind.t -> Kind.t -> bool
 
-(** [check_sort ~doctor ~expected found] determines whether the
-    sort [found] is compatible with the [expected] one. *)
-val check_sort : doctor:Doctor.t -> expected:Sort.t -> Sort.t -> bool
+(** [check_sort ~expected found] determines whether the sort
+    [found] is compatible with the [expected] one. *)
+val check_sort : expected:Sort.t -> Sort.t -> bool
 
 (** [check_term ~doctor ~expected found] determines whether the
     term [found] is compatible with the [expected] one. *)

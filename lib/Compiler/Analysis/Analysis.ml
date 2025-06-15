@@ -8,16 +8,16 @@ module Context = Quickmap.Make (Name) (Kind)
 let nat = Name.of_string_exn "Nat"
 let unit = Name.of_string_exn "Unit"
 
-let fetch_term =
+let fetch_term : doctor:Doctor.t -> context:Context.t -> Name.t -> Kind.t option =
   fun ~doctor ~context name ->
   Context.get name context
   |> Option.on_none (fun () -> Doctor.add_error (Diagnosis.Name_not_found name) doctor)
 ;;
 
-let infer_sort_of_sort = fun ~doctor:_ ~context:_ _ -> Some Sort.Type
+let infer_sort_of_sort : Sort.t -> Sort.t option = fun _ -> Some Sort.Type
 
 let infer_kind_of_primitive =
-  fun ~doctor:_ ~context:_ prim ->
+  fun prim ->
   (match (prim : Primitive.t) with
    | Nat _ -> nat
    | Unit -> unit)
@@ -26,45 +26,45 @@ let infer_kind_of_primitive =
   |> Option.some
 ;;
 
-let infer_kind_of_parameter =
-  fun ~doctor:_ ~context:_ parameter ->
+let infer_kind_of_parameter : Parameter.t -> Kind.t option =
+  fun parameter ->
   match parameter with
-  | Lang.Named (_, kind) -> Some kind
+  | Named (_, kind) -> Some kind
 ;;
 
-let rec infer_kind_of_kind =
+let rec infer_kind_of_kind
+  : doctor:Doctor.t -> context:Context.t -> Kind.t -> Kind.t option
+  =
   fun ~doctor ~context kind ->
-  let open Lang in
   match kind with
   | Arrow _ -> Some (Sort Type)
   | Sort sort ->
-    let+ sort_sort = infer_sort_of_sort ~doctor ~context sort in
-    Some (Sort sort_sort)
+    let+ sort_sort = infer_sort_of_sort sort in
+    Some (Kind.Sort sort_sort)
   | Term term -> infer_kind_of_term ~doctor ~context term
 
-and infer_kind_of_term =
+and infer_kind_of_term : doctor:Doctor.t -> context:Context.t -> Term.t -> Kind.t option =
   fun ~doctor ~context term ->
-  let open Lang in
   match term with
   | App (func, arg) -> try_apply ~doctor ~context func arg
   | Fun ((Named (name, kind) as param), ret) ->
-    let+ param_kind = infer_kind_of_parameter ~doctor ~context param in
+    let+ param_kind = infer_kind_of_parameter param in
     let+ ret_kind =
       infer_kind_of_term ~doctor ~context:(Context.add name kind context) ret
     in
-    Some (Arrow (Named (name, param_kind), ret_kind))
+    Some (Kind.Arrow (Named (name, param_kind), ret_kind))
   | Hole ->
     Doctor.add_warning Diagnosis.Hole_found doctor;
     Some (Term Hole)
-  | Primitive prim -> infer_kind_of_primitive ~doctor ~context prim
+  | Primitive prim -> infer_kind_of_primitive prim
   | Var name -> fetch_term ~doctor ~context name
 
-and check_kind =
+and check_kind : doctor:Doctor.t -> expected:Kind.t -> Kind.t -> bool =
   fun ~doctor ~expected found ->
   match ((expected, found) : Kind.t * Kind.t) with
   | Arrow (Named (_, e_kind), e_ret), Arrow (Named (_, f_kind), f_ret) ->
     check_kind ~doctor ~expected:e_kind f_kind && check_kind ~doctor ~expected:e_ret f_ret
-  | Sort e_sort, Sort f_sort -> check_sort ~doctor ~expected:e_sort f_sort
+  | Sort e_sort, Sort f_sort -> check_sort ~expected:e_sort f_sort
   | Term Hole, _ -> true
   | _, Term Hole ->
     Doctor.add_info (Diagnosis.Expected_type expected) doctor;
@@ -72,14 +72,14 @@ and check_kind =
   | Term e_term, Term f_term -> check_term ~doctor ~expected:e_term f_term
   | _, _ -> false
 
-and check_sort =
-  fun ~doctor:_ ~expected found ->
+and check_sort : expected:Sort.t -> Sort.t -> bool =
+  fun ~expected found ->
   match ((expected, found) : Sort.t * Sort.t) with
   | Prop, Prop -> true
   | Type, Type -> true
   | _, _ -> false
 
-and check_term =
+and check_term : doctor:Doctor.t -> expected:Term.t -> Term.t -> bool =
   fun ~doctor ~expected found ->
   match ((expected, found) : Term.t * Term.t) with
   | App (e_func, e_arg), App (f_func, f_arg) ->
@@ -95,12 +95,12 @@ and check_term =
   | Var e_name, Var f_name -> Name.equal e_name f_name
   | _, _ -> false
 
-and check_parameter =
+and check_parameter : doctor:Doctor.t -> expected:Parameter.t -> Parameter.t -> bool =
   fun ~doctor ~expected found ->
   match expected, found with
   | Named (_, e_kind), Named (_, f_kind) -> check_kind ~doctor ~expected:e_kind f_kind
 
-and try_apply =
+and try_apply : doctor:Doctor.t -> context:Context.t -> Term.t -> Term.t -> Kind.t option =
   fun ~doctor ~context func arg ->
   let+ func_kind = infer_kind_of_term ~doctor ~context func in
   let+ arg_kind = infer_kind_of_term ~doctor ~context arg in
@@ -113,7 +113,7 @@ and try_apply =
          doctor;
        None
      | true ->
-       let right = propagate_parameter (Lang.Named (name, Kind.term arg)) ret in
+       let right = propagate_parameter (Parameter.Named (name, Kind.term arg)) ret in
        Some right)
   | _ ->
     Doctor.add_error
@@ -121,7 +121,7 @@ and try_apply =
       doctor;
     None
 
-and propagate_parameter =
+and propagate_parameter : Parameter.t -> Kind.t -> Kind.t =
   fun (Named (param_name, param_kind)) rest ->
   let propagate = propagate_parameter (Named (param_name, param_kind)) in
   match rest with
@@ -136,7 +136,9 @@ and propagate_parameter =
      | _ -> Kind.term term)
 ;;
 
-let compare_with_annotation =
+let compare_with_annotation
+  : doctor:Doctor.t -> annotation:Kind.t option -> Kind.t -> Kind.t option
+  =
   fun ~doctor ~annotation found_kind ->
   match annotation with
   | None -> Some found_kind
@@ -150,7 +152,9 @@ let compare_with_annotation =
      | true -> Some kind)
 ;;
 
-let check_statement =
+let check_statement
+  : doctor:Doctor.t -> context:Context.t -> Statement.t -> Context.t option
+  =
   fun ~doctor ~context statement ->
   match (statement : Statement.t) with
   | Let (name, annotation, body) ->
@@ -162,7 +166,9 @@ let check_statement =
     Some context
 ;;
 
-let rec check_program =
+let rec check_program
+  : doctor:Doctor.t -> ?context:Context.t -> Program.t -> Context.t option
+  =
   fun ~doctor ?(context = Context.empty) program ->
   match program with
   | [] -> Some context
@@ -171,7 +177,7 @@ let rec check_program =
     check_program ~doctor ~context rest
 ;;
 
-let intrinsics =
+let intrinsics : Context.t =
   let _Nat = Name.of_string_exn "Nat" in
   let _Unit = Name.of_string_exn "Unit" in
   let _O = Name.of_string_exn "O" in
