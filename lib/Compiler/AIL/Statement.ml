@@ -1,6 +1,6 @@
 open Custom
 
-type t =
+type nonrec t =
   | Let of Name.t * Kind.t option * Term.t
   | Print of Term.t
 
