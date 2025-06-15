@@ -59,7 +59,10 @@ end = struct
     fun painter kind ->
     match kind with
     | Arrow (param, ret) ->
-      Printf.sprintf "%s -> %s" (Parameter.show painter param) (show painter ret)
+      Printf.sprintf
+        "%s -> %s"
+        (Parameter.show painter param)
+        (show painter ret)
     | Sort sort -> Sort.show painter sort
     | Term term -> Term.show painter term
   ;;
@@ -177,14 +180,17 @@ end = struct
         "%s %s"
         (show_considering_precedence painter func ~parent:term)
         (args ++ [ arg ]
-         |> List.map (show_considering_precedence painter ~parent:term)
+         |> List.map
+              (show_considering_precedence painter ~parent:term)
          |> String.concat " ")
     | Fun (param, ret) ->
       let params, ret = uncurry_function ret in
       Printf.sprintf
         "%s %s -> %s"
         (Painter.paint_keyword "fun")
-        (param :: params |> List.map (Parameter.show painter) |> String.concat " ")
+        (param :: params
+         |> List.map (Parameter.show painter)
+         |> String.concat " ")
         (show_considering_precedence painter ret ~parent:term)
     | Hole -> Painter.paint_hole "_"
     | Primitive prim -> Primitive.show (module Painter) prim
@@ -230,7 +236,10 @@ end = struct
     fun painter parameter ->
     match parameter with
     | Named (name, kind) ->
-      Printf.sprintf "(%s : %s)" (Name.show painter name) (Kind.show painter kind)
+      Printf.sprintf
+        "(%s : %s)"
+        (Name.show painter name)
+        (Kind.show painter kind)
   ;;
 end
 
@@ -255,7 +264,10 @@ end = struct
     | Let of Name.t * Kind.t option * Term.t
     | Print of Term.t
 
-  let let' = fun name ?annotation term -> Let (name, annotation, term)
+  let let' =
+    fun name ?annotation term -> Let (name, annotation, term)
+  ;;
+
   let print = fun term -> Print term
 
   let show =
@@ -266,19 +278,31 @@ end = struct
       let buffer = Buffer.create 64 in
       Buffer.add_string
         buffer
-        (Printf.sprintf "%s %s" (Painter.paint_keyword "let") (Name.show painter name));
+        (Printf.sprintf
+           "%s %s"
+           (Painter.paint_keyword "let")
+           (Name.show painter name));
       (match annotation with
        | None -> ()
        | Some kind ->
          Buffer.add_string
            buffer
-           (Printf.sprintf " %s %s" (Painter.paint_keyword ":") (Kind.show painter kind)));
+           (Printf.sprintf
+              " %s %s"
+              (Painter.paint_keyword ":")
+              (Kind.show painter kind)));
       Buffer.add_string
         buffer
-        (Printf.sprintf " %s %s" (Painter.paint_bold "=") (Term.show painter body));
+        (Printf.sprintf
+           " %s %s"
+           (Painter.paint_bold "=")
+           (Term.show painter body));
       Buffer.contents buffer
     | Print term ->
-      Printf.sprintf "%s %s" (Painter.paint_keyword "print") (Term.show painter term)
+      Printf.sprintf
+        "%s %s"
+        (Painter.paint_keyword "print")
+        (Term.show painter term)
   ;;
 end
 
@@ -293,6 +317,8 @@ end = struct
 
   let show =
     fun painter program ->
-    program |> List.map (Statement.show painter) |> String.concat "\n"
+    program
+    |> List.map (Statement.show painter)
+    |> String.concat "\n"
   ;;
 end

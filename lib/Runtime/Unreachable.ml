@@ -8,5 +8,6 @@ let show =
   fun painter unreachable ->
   match unreachable with
   | Illegal_application -> "illegal application"
-  | Undefined_name name -> Printf.sprintf "undefined name %s" (Name.show painter name)
+  | Undefined_name name ->
+    Printf.sprintf "undefined name %s" (Name.show painter name)
 ;;

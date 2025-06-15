@@ -11,7 +11,9 @@ type color =
   | White
 
 (** [check_tty ()] checks whether the stdout & stderr are TTYs. *)
-let check_tty () : bool = Out_channel.isatty stdout && Out_channel.isatty stderr
+let check_tty () : bool =
+  Out_channel.isatty stdout && Out_channel.isatty stderr
+;;
 
 module type CONFIG = sig
   val show_styling : [ `Never | `Always | `Auto ]
@@ -24,7 +26,10 @@ module type TYPE = sig
       that always paints and make it only paint according to
       a configuration and/or whether the stdout & stderr are
       TTYs. *)
-  val make_intelligent_painter : (string -> string) -> string -> string
+  val make_intelligent_painter
+    :  (string -> string)
+    -> string
+    -> string
 
   (** [paint_bold string] paints [string] in bold. *)
   val paint_bold : string -> string
@@ -40,11 +45,19 @@ module type TYPE = sig
 
   (** [paint_foreground ?bright color string] paints [string] in
       the [color]. *)
-  val paint_foreground : ?bright:bool -> color -> string -> string
+  val paint_foreground
+    :  ?bright:bool
+    -> color
+    -> string
+    -> string
 
   (** [paint_background ?bright color string] paints the
       background of [string] in the [color]. *)
-  val paint_background : ?bright:bool -> color -> string -> string
+  val paint_background
+    :  ?bright:bool
+    -> color
+    -> string
+    -> string
 end
 
 module Make (Config : CONFIG) : TYPE = struct
@@ -81,13 +94,17 @@ module Make (Config : CONFIG) : TYPE = struct
 
   let paint_foreground =
     fun ?(bright = false) color ->
-    let opener = color_to_int color + if bright then 40 else 30 in
+    let opener =
+      color_to_int color + if bright then 40 else 30
+    in
     make_ansi_painter opener 39
   ;;
 
   let paint_background =
     fun ?(bright = false) color ->
-    let opener = color_to_int color + if bright then 100 else 90 in
+    let opener =
+      color_to_int color + if bright then 100 else 90
+    in
     make_ansi_painter opener 49
   ;;
 end

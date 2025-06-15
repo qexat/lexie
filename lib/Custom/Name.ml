@@ -3,7 +3,10 @@ include Batteries.String.Constrain (struct
 
     let predicate =
       fun string ->
-      String.for_all (fun char -> Char.is_alphabetical char || Char.equal char '_') string
+      String.for_all
+        (fun char ->
+           Char.is_alphabetical char || Char.equal char '_')
+        string
       && not (String.equal string "_")
     ;;
   end)
@@ -12,7 +15,9 @@ module Type = Batteries.String.Constrain (struct
     open Batteries
 
     let predicate =
-      fun string -> predicate string && List.mem string.[0] Char.uppercase_latin_alphabet
+      fun string ->
+      predicate string
+      && List.mem string.[0] Char.uppercase_latin_alphabet
     ;;
   end)
 

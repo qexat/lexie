@@ -8,7 +8,11 @@ type t =
 let compare =
   fun left right ->
   match left, right with
-  | Atom, Atom | Grouping, Grouping | App, App | Binary, Binary | Fun, Fun -> 0
+  | Atom, Atom
+  | Grouping, Grouping
+  | App, App
+  | Binary, Binary
+  | Fun, Fun -> 0
   | Atom, (Grouping | App | Binary | Fun)
   | Grouping, (App | Binary | Fun)
   | App, (Binary | Fun)
@@ -20,4 +24,7 @@ let compare =
 ;;
 
 let equal = fun left right -> compare left right = 0
-let binds_tighter = fun left ~than:right -> compare left right <= 0
+
+let binds_tighter =
+  fun left ~than:right -> compare left right <= 0
+;;

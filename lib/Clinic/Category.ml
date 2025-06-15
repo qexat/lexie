@@ -18,4 +18,7 @@ let get_painter_function =
   | Info -> Painter.paint_info
 ;;
 
-let show = fun painter category -> get_painter_function painter category (name category)
+let show =
+  fun painter category ->
+  get_painter_function painter category (name category)
+;;

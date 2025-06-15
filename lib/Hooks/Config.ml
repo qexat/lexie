@@ -4,6 +4,8 @@ type t =
   }
 
 let create =
-  fun ?(print_program = false) ?(use_compiler_intrinsics = false) () ->
+  fun ?(print_program = false)
+    ?(use_compiler_intrinsics = false)
+    () ->
   { print_program; use_compiler_intrinsics }
 ;;

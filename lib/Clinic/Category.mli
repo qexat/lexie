@@ -12,7 +12,11 @@ val name : t -> string
 (** [get_painter_function painter category] returns the function
     of the [painter] that should be used to represent the
     [category]. *)
-val get_painter_function : (module Painter.TYPE) -> t -> string -> string
+val get_painter_function
+  :  (module Painter.TYPE)
+  -> t
+  -> string
+  -> string
 
 (** [show painter category] produces a pretty-printable
     representation of the [category] using the [painter]. *)

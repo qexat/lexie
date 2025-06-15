@@ -1,4 +1,7 @@
-let ( or ) = fun option fallback -> Option.value ~default:fallback option
+let ( or ) =
+  fun option fallback -> Option.value ~default:fallback option
+;;
+
 let ( let+ ) = Option.bind
 let ( let* ) = Result.bind
 

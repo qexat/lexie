@@ -20,16 +20,25 @@ let _O = Name.of_string_exn "O"
 
 let lambda3 =
   fun param1 param2 param3 ret ->
-  Term.lambda param1 (Term.lambda param2 (Term.lambda param3 ret))
+  Term.lambda
+    param1
+    (Term.lambda param2 (Term.lambda param3 ret))
 ;;
 
 let lambda6 =
   fun param1 param2 param3 param4 param5 param6 ret ->
-  lambda3 param1 param2 param3 (lambda3 param4 param5 param6 ret)
+  lambda3
+    param1
+    param2
+    param3
+    (lambda3 param4 param5 param6 ret)
 ;;
 
 let arrow2 =
-  fun param1 param2 ret -> Kind.arrow (Named (a, param1)) (Arrow (Named (b, param2), ret))
+  fun param1 param2 ret ->
+  Kind.arrow
+    (Named (a, param1))
+    (Arrow (Named (b, param2), ret))
 ;;
 
 let arrow3 =
@@ -49,7 +58,13 @@ let faulty_program =
          (Named (_A, Sort Sort.Type))
          (Named (_B, Sort Sort.Type))
          (Named (_C, Sort Sort.Type))
-         (Named (a, arrow3 (Term (Var _B)) (Term (Var _C)) (Term (Var _B)) (Term (Var _A))))
+         (Named
+            ( a
+            , arrow3
+                (Term (Var _B))
+                (Term (Var _C))
+                (Term (Var _B))
+                (Term (Var _A)) ))
          (Named (b, Term (Var _B)))
          (Named (c, Term (Var _C)))
          (app3 (Var a) (Var b) (Var c) (Var b)))
@@ -61,7 +76,12 @@ let faulty_program =
          (Named (_C, Sort Sort.Type))
          (Named (a, Term (Var _A)))
          (Named (b, Term (Var _B)))
-         (Named (c, arrow2 (Term (Var _A)) (Term (Var _B)) (Term (Var _C))))
+         (Named
+            ( c
+            , arrow2
+                (Term (Var _A))
+                (Term (Var _B))
+                (Term (Var _C)) ))
          (Term.app2 (Var c) (Var a) (Var b)))
   ; Statement.let'
       delta
@@ -84,7 +104,8 @@ let working_program =
       (Term.lambda
          (Named (_T, Sort Sort.Type))
          (Term.lambda (Named (x, Term (Var _T))) (Var x)))
-  ; Statement.print (Term.app2 (Term.var id) (Term.var _Nat) (Var _O))
+  ; Statement.print
+      (Term.app2 (Term.var id) (Term.var _Nat) (Var _O))
   ]
 ;;
 

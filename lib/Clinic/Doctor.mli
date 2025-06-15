@@ -57,19 +57,35 @@ val review : (module Painter.TYPE) -> t -> review
     shorthand to create a temporary doctor with the given
     [config], add the [diagnostic], and immediately review it
     using the [painter]. *)
-val emit_single_diagnostic : (module Painter.TYPE) -> Config.t -> Diagnostic.t -> review
+val emit_single_diagnostic
+  :  (module Painter.TYPE)
+  -> Config.t
+  -> Diagnostic.t
+  -> review
 
 (** [emit_single_error painter config diagnosis] is the same as
     [emit_single_diagnostic] but the diagnostic is an error
     created using the [diagnosis]. *)
-val emit_single_error : (module Painter.TYPE) -> Config.t -> Diagnosis.t -> review
+val emit_single_error
+  :  (module Painter.TYPE)
+  -> Config.t
+  -> Diagnosis.t
+  -> review
 
 (** [emit_single_error painter config diagnosis] is the same as
     [emit_single_diagnostic] but the diagnostic is a warning
     created using the [diagnosis]. *)
-val emit_single_warning : (module Painter.TYPE) -> Config.t -> Diagnosis.t -> review
+val emit_single_warning
+  :  (module Painter.TYPE)
+  -> Config.t
+  -> Diagnosis.t
+  -> review
 
 (** [emit_single_error painter config diagnosis] is the same as
     [emit_single_diagnostic] but the diagnostic is an info
     created using the [diagnosis]. *)
-val emit_single_info : (module Painter.TYPE) -> Config.t -> Diagnosis.t -> review
+val emit_single_info
+  :  (module Painter.TYPE)
+  -> Config.t
+  -> Diagnosis.t
+  -> review

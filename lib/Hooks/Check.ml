@@ -4,12 +4,19 @@ open Clinic
 let execute =
   fun ~doctor ~painter (config : Config.t) program ->
   if config.print_program
-  then Printf.printf "%s\n---\n" (AIL.Program.show painter program);
+  then
+    Printf.printf "%s\n---\n" (AIL.Program.show painter program);
   let context =
-    if config.use_compiler_intrinsics then Some Analysis.intrinsics else None
+    if config.use_compiler_intrinsics
+    then Some Analysis.intrinsics
+    else None
   in
-  let maybe_context = Analysis.check_program ~doctor ?context program in
-  Option.iter (Analysis.Context.show painter *> Printf.printf "%s\n") maybe_context;
+  let maybe_context =
+    Analysis.check_program ~doctor ?context program
+  in
+  Option.iter
+    (Analysis.Context.show painter *> Printf.printf "%s\n")
+    maybe_context;
   let review = Doctor.review painter doctor in
   Option.iter (Printf.eprintf "%s\n") review.details;
   match review.decision with

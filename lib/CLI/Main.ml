@@ -4,12 +4,17 @@ let make_term_with_config =
   fun func ->
   let open Term.Syntax in
   let+ strict =
-    Arg.(value & flag & info [ "strict" ] ~doc:"Set type-checking strict mode")
+    Arg.(
+      value
+      & flag
+      & info [ "strict" ] ~doc:"Set type-checking strict mode")
   and+ print_program =
     Arg.(
       value
       & flag
-      & info [ "print-program" ] ~doc:"Print the program that is being processed")
+      & info
+          [ "print-program" ]
+          ~doc:"Print the program that is being processed")
   and+ use_compiler_intrinsics =
     Arg.(
       value
@@ -20,17 +25,34 @@ let make_term_with_config =
   and+ show_styling =
     Arg.(
       value
-      & opt (enum [ "never", `Never; "always", `Always; "auto", `Auto ]) `Auto
-      & info [ "show-styling" ] ~doc:"Print ANSI escape sequences")
+      & opt
+          (enum
+             [ "never", `Never
+             ; "always", `Always
+             ; "auto", `Auto
+             ])
+          `Auto
+      & info
+          [ "show-styling" ]
+          ~doc:"Print ANSI escape sequences")
   in
   let config : Config.t =
-    { strict; print_program; use_compiler_intrinsics; show_styling }
+    { strict
+    ; print_program
+    ; use_compiler_intrinsics
+    ; show_styling
+    }
   in
   func config
 ;;
 
-let check_subcommand = Cmd.v (Cmd.info "check") (make_term_with_config Check.execute)
-let run_subcommand = Cmd.v (Cmd.info "run") (make_term_with_config Run.execute)
+let check_subcommand =
+  Cmd.v (Cmd.info "check") (make_term_with_config Check.execute)
+;;
+
+let run_subcommand =
+  Cmd.v (Cmd.info "run") (make_term_with_config Run.execute)
+;;
 
 let lexie_command =
   let doc = "TODO" in

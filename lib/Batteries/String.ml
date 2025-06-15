@@ -8,7 +8,9 @@ let indent_line =
 
 let indent =
   fun ?(width = 4) ?(count = 1) ?(marker = ' ') string ->
-  split_on_char '\n' string |> List.map (indent_line ~width ~count ~marker) |> concat "\n"
+  split_on_char '\n' string
+  |> List.map (indent_line ~width ~count ~marker)
+  |> concat "\n"
 ;;
 
 module Notation = struct
@@ -53,7 +55,10 @@ module Constrain (P : PREDICATE) : REFINED = struct
   let lift_exn =
     fun func refined ->
     match lift func refined with
-    | None -> failwith "func did not return a string that satisfies the predicate"
+    | None ->
+      failwith
+        "func did not return a string that satisfies the \
+         predicate"
     | Some result -> result
   ;;
 
@@ -70,7 +75,8 @@ module Constrain (P : PREDICATE) : REFINED = struct
   let of_string_exn =
     fun string ->
     match of_string string with
-    | None -> invalid_arg "string does not satisfy the predicate"
+    | None ->
+      invalid_arg "string does not satisfy the predicate"
     | Some refined -> refined
   ;;
 end

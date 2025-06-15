@@ -14,7 +14,13 @@ let execute =
          let show_styling = config.show_styling
        end) : Painter.TYPE)
   in
-  match Hooks.Check.execute ~doctor ~painter hook_config Sample.program with
+  match
+    Hooks.Check.execute
+      ~doctor
+      ~painter
+      hook_config
+      Sample.program
+  with
   | None -> 1
   | Some _ -> 0
 ;;

@@ -63,7 +63,8 @@ module Make (Key : SHOWABLE) (Value : SHOWABLE) :
     match mapping with
     | [] -> []
     | (key', _) :: rest when key = key' -> (key, value) :: rest
-    | (key', value') :: rest -> (key', value') :: update key value rest
+    | (key', value') :: rest ->
+      (key', value') :: update key value rest
   ;;
 
   let add = fun key value mapping -> (key, value) :: mapping
@@ -73,7 +74,10 @@ module Make (Key : SHOWABLE) (Value : SHOWABLE) :
     fun painter mapping ->
     mapping
     |> List.rev_map (fun (key, value) ->
-      Printf.sprintf "%s : %s" (Key.show painter key) (Value.show painter value))
+      Printf.sprintf
+        "%s : %s"
+        (Key.show painter key)
+        (Value.show painter value))
     |> String.concat " ; "
     |> Printf.sprintf "[ %s ]"
   ;;

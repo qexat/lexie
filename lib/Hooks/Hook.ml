@@ -2,7 +2,11 @@ open Batteries
 open Clinic
 
 type ('config, 'input, 'output) hook =
-  doctor:Doctor.t -> painter:(module Painter.TYPE) -> 'config -> 'input -> 'output option
+  doctor:Doctor.t
+  -> painter:(module Painter.TYPE)
+  -> 'config
+  -> 'input
+  -> 'output option
 
 let compose =
   fun left right ->

@@ -7,7 +7,11 @@ let compare = Int.compare
 let succ = Int.succ
 let pred = fun p -> if equal p 0 then 0 else Int.pred p
 let add = Int.add
-let sub = fun p1 p2 -> if compare p1 p2 < 0 then 0 else Int.sub p1 p2
+
+let sub =
+  fun p1 p2 -> if compare p1 p2 < 0 then 0 else Int.sub p1 p2
+;;
+
 let mul = Int.mul
 let div = Int.div
 let modulo = Int.rem

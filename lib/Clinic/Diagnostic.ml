@@ -25,6 +25,9 @@ let show =
   Printf.sprintf
     "%s%s %s"
     (Category.show painter diagnostic.category)
-    (Category.get_painter_function painter diagnostic.category ":")
+    (Category.get_painter_function
+       painter
+       diagnostic.category
+       ":")
     (Diagnosis.show painter diagnostic.diagnosis)
 ;;

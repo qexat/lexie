@@ -7,13 +7,16 @@ let rec evaluate_term =
   let open Exception in
   match (term : AIL.Term.t) with
   | App (func, arg) -> apply_term ~env func arg
-  | Fun (param, ret) -> Ok (Object.Fun (AIL.Parameter.name param, Object.Late ret))
-  | Hole -> Error (Either.Left { kind = Exception.Incomplete_program })
+  | Fun (param, ret) ->
+    Ok (Object.Fun (AIL.Parameter.name param, Object.Late ret))
+  | Hole ->
+    Error (Either.Left { kind = Exception.Incomplete_program })
   | Primitive prim -> Ok (Object.Constant prim)
   | Var name ->
     (match Environment.get name env with
      | Some obj -> Ok obj
-     | None -> Error (Either.Right (Unreachable.Undefined_name name)))
+     | None ->
+       Error (Either.Right (Unreachable.Undefined_name name)))
 
 and apply_term =
   fun ~env func arg ->
@@ -21,7 +24,11 @@ and apply_term =
   let* arg_object = evaluate_term ~env arg in
   match func_object with
   | Fun (param, Late ret) ->
-    let* ret' = evaluate_term ~env:(Environment.add param arg_object env) ret in
+    let* ret' =
+      evaluate_term
+        ~env:(Environment.add param arg_object env)
+        ret
+    in
     Ok ret'
   | Fun (_, ret) -> Ok ret
   | _ -> Error (Either.Right Unreachable.Illegal_application)
@@ -62,7 +69,11 @@ let print_unreachable =
   let module Painter = (val painter : Painter.TYPE) in
   let tag = Painter.paint_error "internal error:" in
   let tag_ext = Painter.paint_info "unreachable:" in
-  Printf.eprintf "%s %s %s\n" tag tag_ext (Unreachable.show painter unreachable)
+  Printf.eprintf
+    "%s %s %s\n"
+    tag
+    tag_ext
+    (Unreachable.show painter unreachable)
 ;;
 
 let evaluate =

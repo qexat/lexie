@@ -10,7 +10,12 @@ val indent : ?width:int -> ?count:int -> ?marker:char -> t -> t
     single [line] by [count] tabulations of [width].
     [marker] can specified if the indent should start with a
     non-whitespace marker. *)
-val indent_line : ?width:int -> ?count:int -> ?marker:char -> t -> t
+val indent_line
+  :  ?width:int
+  -> ?count:int
+  -> ?marker:char
+  -> t
+  -> t
 
 module Notation : sig
   val ( <> ) : t -> t -> t
