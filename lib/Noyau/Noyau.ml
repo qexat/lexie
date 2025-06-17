@@ -444,4 +444,134 @@ end = struct
   let ( ^ ) f n = repeat ~n f
 end
 
+module Interface = struct
+  open Pervasives
+
+  module type COMPARABLE = sig
+    type ty
+
+    val compare : ty -> ty -> compare
+  end
+
+  module type COMPARABLE_POLY1 = sig
+    type 'first ty
+
+    val compare
+      : 'first.
+      ('first -> 'first -> compare)
+      -> 'first ty
+      -> 'first ty
+      -> compare
+  end
+
+  module type COMPARABLE_POLY2 = sig
+    type ('first, 'second) ty
+
+    val compare
+      : 'first 'second.
+      ('first -> 'first -> compare)
+      -> ('second -> 'second -> compare)
+      -> ('first, 'second) ty
+      -> ('first, 'second) ty
+      -> compare
+  end
+
+  module type COMPARABLE_POLY3 = sig
+    type ('first, 'second, 'third) ty
+
+    val compare
+      : 'first 'second 'third.
+      ('first -> 'first -> compare)
+      -> ('second -> 'second -> compare)
+      -> ('third -> 'third -> compare)
+      -> ('first, 'second, 'third) ty
+      -> ('first, 'second, 'third) ty
+      -> compare
+  end
+
+  module type SERIALIZE = sig
+    type ty
+
+    val serialize : ty -> string
+  end
+
+  module type SERIALIZE_POLY1 = sig
+    type 'first ty
+
+    val serialize
+      : 'first.
+      ('first -> string) -> 'first ty -> string
+  end
+
+  module type SERIALIZE_POLY2 = sig
+    type ('first, 'second) ty
+
+    val serialize
+      : 'first 'second.
+      ('first -> string)
+      -> ('second -> string)
+      -> ('first, 'second) ty
+      -> string
+  end
+
+  module type SERIALIZE_POLY3 = sig
+    type ('first, 'second, 'third) ty
+
+    val serialize
+      : 'first 'second 'third.
+      ('first -> string)
+      -> ('second -> string)
+      -> ('third -> string)
+      -> ('first, 'second, 'third) ty
+      -> string
+  end
+
+  module type DESERIALIZE = sig
+    type ty
+    type deserialization_error
+
+    val deserialize
+      :  string
+      -> (ty, deserialization_error) result
+  end
+
+  module type DESERIALIZE_POLY1 = sig
+    type 'first ty
+    type deserialization_error
+
+    val deserialize
+      : 'first.
+      (string -> ('first, deserialization_error) result)
+      -> string
+      -> ('first ty, deserialization_error) result
+  end
+
+  module type DESERIALIZE_POLY2 = sig
+    type ('first, 'second) ty
+    type deserialization_error
+
+    val deserialize
+      : 'first 'second.
+      (string -> ('first, deserialization_error) result)
+      -> (string -> ('second, deserialization_error) result)
+      -> string
+      -> (('first, 'second) ty, deserialization_error) result
+  end
+
+  module type DESERIALIZE_POLY3 = sig
+    type ('first, 'second, 'third) ty
+    type deserialization_error
+
+    val deserialize
+      : 'first 'second 'third.
+      (string -> ('first, deserialization_error) result)
+      -> (string -> ('second, deserialization_error) result)
+      -> (string -> ('third, deserialization_error) result)
+      -> string
+      -> ( ('first, 'second, 'third) ty
+           , deserialization_error )
+           result
+  end
+end
+
 include Pervasives
