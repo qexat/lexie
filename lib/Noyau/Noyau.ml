@@ -232,19 +232,225 @@ end = struct
 end
 
 and Maybe : sig
-  type 't ty = 't Pervasives.maybe
+  type 'item ty = 'item Pervasives.maybe
 
-  val ( or ) : 't. 't ty -> 't -> 't
+  val nothing : 'item. 'item ty
+  val some : 'item. 'item -> 'item ty
+
+  val compare
+    : 'item.
+    ('item -> 'item -> Compare.ty)
+    -> 'item ty
+    -> 'item ty
+    -> Compare.ty
+
+  val equal
+    : 'item.
+    ('item -> 'item -> Bool.ty)
+    -> 'item ty
+    -> 'item ty
+    -> Bool.ty
+
+  val are_same_variants : 'item. 'item ty -> 'item ty -> Bool.ty
+
+  val map
+    : 'item1 'item2.
+    ('item1 -> 'item2) -> 'item1 ty -> 'item2 ty
+
+  val map2
+    : 'item1 'item2 'item3.
+    ('item1 -> 'item2 -> 'item3)
+    -> 'item1 ty
+    -> 'item2 ty
+    -> 'item3 ty
+
+  val lift : 'item. 'item -> 'item ty
+
+  val apply
+    : 'item1 'item2.
+    ('item1 -> 'item2) ty -> 'item1 ty -> 'item2 ty
+
+  val join : 'item. 'item ty ty -> 'item ty
+
+  val bind
+    : 'item1 'item2.
+    'item1 ty -> ('item1 -> 'item2 ty) -> 'item2 ty
+
+  val perform : 'item. ('item -> Unit.ty) -> 'item ty -> Unit.ty
+  val get : 'item. 'item ty -> fallback:'item -> 'item
+
+  val get_lazy
+    : 'item.
+    'item ty -> fallback:(Unit.ty -> 'item) -> 'item
+
+  val to_result
+    : 'item 'error.
+    nothing:'error -> 'item ty -> ('item, 'error) Result.ty
+
+  val to_result_lazy
+    : 'item 'error.
+    nothing:(Unit.ty -> 'error)
+    -> 'item ty
+    -> ('item, 'error) Result.ty
+
+  val to_list : 'item. 'item ty -> 'item List.ty
+  val ( or ) : 'item. 'item ty -> 'item ty -> 'item ty
+
+  val ( ||> )
+    : 'item.
+    'item ty -> (Unit.ty -> 'item ty) -> 'item ty
+
+  val ( let+ )
+    : 'item1 'item2.
+    'item1 ty -> ('item1 -> 'item2 ty) -> 'item2 ty
+
+  val ( let- )
+    : 'item.
+    'item ty -> (Unit.ty -> 'item ty) -> 'item ty
 end = struct
   open Pervasives
 
   type 'item ty = 'item maybe
 
-  let ( or ) maybe fallback =
+  let nothing : type item. item ty = Nothing
+  let some : type item. item -> item ty = fun item -> Some item
+
+  let compare
+    : type item.
+      (item -> item -> compare) -> item ty -> item ty -> compare
+    =
+    fun item_compare left right ->
+    match left, right with
+    | Some item_left, Some item_right ->
+      item_compare item_left item_right
+    | Some _, Nothing -> Greater
+    | Nothing, Some _ -> Less
+    | Nothing, Nothing -> Equal
+  ;;
+
+  let equal
+    : type item.
+      (item -> item -> bool) -> item ty -> item ty -> bool
+    =
+    fun item_equal left right ->
+    match left, right with
+    | Some item_left, Some item_right ->
+      item_equal item_left item_right
+    | Nothing, Nothing -> True
+    | _, _ -> False
+  ;;
+
+  let are_same_variants
+    : type item1 item2. item1 ty -> item2 ty -> bool
+    =
+    fun left right ->
+    match left, right with
+    | Nothing, Nothing | Some _, Some _ -> True
+    | _, _ -> False
+  ;;
+
+  let map
+    : type item1 item2. (item1 -> item2) -> item1 ty -> item2 ty
+    =
+    fun f -> function
+    | Nothing -> Nothing
+    | Some item -> Some (f item)
+  ;;
+
+  let bind
+    : type item1 item2.
+      item1 ty -> (item1 -> item2 ty) -> item2 ty
+    =
+    fun maybe f ->
+    match map f maybe with
+    | Nothing -> Nothing
+    | Some maybe_item -> maybe_item
+  ;;
+
+  let map2
+    : type item1 item2 item3.
+      (item1 -> item2 -> item3)
+      -> item1 ty
+      -> item2 ty
+      -> item3 ty
+    =
+    fun f left right -> bind (map f left) (Fun.flip map right)
+  ;;
+
+  let apply
+    : type item1 item2.
+      (item1 -> item2) ty -> item1 ty -> item2 ty
+    =
+    fun maybe_f maybe_arg -> map2 Fun.( @@ ) maybe_f maybe_arg
+  ;;
+
+  let lift = some
+
+  let join : type item. item ty ty -> item ty =
+    fun maybe -> bind maybe Fun.identity
+  ;;
+
+  let perform : type item. (item -> unit) -> item ty -> unit =
+    fun proc maybe ->
+    match maybe with
+    | Nothing -> ()
+    | Some item -> proc item
+  ;;
+
+  let get_lazy
+    : type item. item ty -> fallback:(unit -> item) -> item
+    =
+    fun maybe ~fallback ->
+    match maybe with
+    | Nothing -> fallback ()
+    | Some item -> item
+  ;;
+
+  let get : type item. item ty -> fallback:item -> item =
+    fun maybe ~fallback ->
     match maybe with
     | Nothing -> fallback
-    | Some value -> value
+    | Some item -> item
   ;;
+
+  let to_result_lazy
+    : type item error.
+      nothing:(unit -> error) -> item ty -> (item, error) result
+    =
+    fun ~nothing maybe ->
+    match maybe with
+    | Some item -> Ok item
+    | Nothing -> Error (nothing ())
+  ;;
+
+  let to_result
+    : type item error.
+      nothing:error -> item ty -> (item, error) result
+    =
+    fun ~nothing maybe ->
+    to_result_lazy ~nothing:(fun () -> nothing) maybe
+  ;;
+
+  let to_list : type item. item ty -> item list = function
+    | Nothing -> []
+    | Some item -> [ item ]
+  ;;
+
+  let ( ||> )
+    : type item. item ty -> (unit -> item ty) -> item ty
+    =
+    fun left f ->
+    match left with
+    | Some _ -> left
+    | Nothing -> f ()
+  ;;
+
+  let ( or ) : type item. item ty -> item ty -> item ty =
+    fun left right -> left ||> fun () -> right
+  ;;
+
+  let ( let+ ) = bind
+  let ( let- ) = ( ||> )
 end
 
 and Either : sig
