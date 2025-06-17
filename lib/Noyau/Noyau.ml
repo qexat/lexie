@@ -186,6 +186,17 @@ and Compare : sig
   val to_int : ty -> int
   val of_int : int -> ty
 end = struct
+  (* NOTE: Compare does not define [compare] for itself because
+     1) I don't see how it is meaningful.
+     2) It makes comparison code more annoying.
+        Consider:
+
+          Compare.(compare foo bar = Equal)
+
+        If [Compare.compare] was a function, users (me) would
+        have to refactor this simple piece into a less readable
+        two-line expression. *)
+
   open Pervasives
 
   type ty = compare
@@ -196,9 +207,13 @@ end = struct
     | _, _ -> False
   ;;
 
+  (* [is_either] is mostly useful for [>=] and [<=]. *)
   let is_either ~left ~right compare =
     compare = left || compare = right
   ;;
+
+  (* [to_int] and [of_int] are defined for "compatibility" with
+     the standard library, but their use is really discouraged. *)
 
   let to_int compare =
     match compare with
