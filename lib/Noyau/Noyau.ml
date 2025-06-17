@@ -1,7 +1,8 @@
 [@@@warning "-65"]
 
 module rec Pervasives : sig
-  (* types *)
+  (** [unit] is a type with a single inhabitant, the empty
+      tuple. *)
   type unit = ()
 
   type bool =
@@ -118,6 +119,20 @@ end = struct
   let ( || ) = Bool.( || )
   let succ = Nat.succ
   let ( |> ) = Fun.( |> )
+end
+
+and Unit : sig
+  type ty = Pervasives.unit
+
+  val compare : ty -> ty -> Compare.ty
+  val equal : ty -> ty -> Bool.ty
+end = struct
+  open Pervasives
+
+  type ty = unit
+
+  let compare : ty -> ty -> compare = fun () () -> Equal
+  let equal : ty -> ty -> bool = fun () () -> True
 end
 
 and Bool : sig
