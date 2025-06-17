@@ -138,6 +138,8 @@ end
 and Bool : sig
   type ty = Pervasives.bool
 
+  val compare : ty -> ty -> Compare.ty
+  val equal : ty -> ty -> ty
   val not : ty -> ty
   val ( && ) : ty -> ty -> ty
   val ( || ) : ty -> ty -> ty
@@ -145,6 +147,18 @@ end = struct
   open Pervasives
 
   type ty = bool
+
+  let compare : ty -> ty -> compare =
+    fun left right ->
+    match left, right with
+    | False, False | True, True -> Equal
+    | True, False -> Greater
+    | False, True -> Less
+  ;;
+
+  let equal : ty -> ty -> bool =
+    fun left right -> Compare.(compare left right = Equal)
+  ;;
 
   let not : ty -> ty = function
     | False -> True
