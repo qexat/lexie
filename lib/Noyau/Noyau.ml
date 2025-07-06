@@ -431,6 +431,12 @@ end = struct
     | Some item -> [ item ]
   ;;
 
+  let ( && ) left right =
+    match left, right with
+    | Some _, Some _ -> right
+    | _, _ -> left
+  ;;
+
   let ( ||> )
     : type item. item ty -> (unit -> item ty) -> item ty
     =
@@ -444,6 +450,8 @@ end = struct
     fun left right -> left ||> fun () -> right
   ;;
 
+  let first_some maybes = List.fold ( or ) Nothing maybes
+  let last_some maybes = join (List.fold_on_first ( && ) maybes)
   let ( let+ ) = bind
   let ( let- ) = ( ||> )
 end
@@ -551,6 +559,14 @@ and List : sig
   val reverse : 'item. 'item ty -> 'item ty
   val concat : 'item. 'item ty -> 'item ty -> 'item ty
 
+  val fold
+    : 'item 'acc.
+    ('acc -> 'item -> 'acc) -> 'acc -> 'item ty -> 'acc
+
+  val fold_on_first
+    : 'item.
+    ('item -> 'item -> 'item) -> 'item ty -> 'item Maybe.ty
+
   module Associative : sig
     type nonrec ('key, 'value) ty = ('key * 'value) ty
   end
@@ -569,6 +585,17 @@ end = struct
 
   let concat (left : 'a ty) (right : 'a ty) : 'a ty =
     reverse_concat (reverse left) right
+  ;;
+
+  let rec fold (f : 'acc -> 'item -> 'acc) (initial : 'acc)
+    = function
+    | [] -> initial
+    | first :: rest -> fold f (f initial first) rest
+  ;;
+
+  let fold_on_first f = function
+    | [] -> Nothing
+    | first :: rest -> Some (fold f first rest)
   ;;
 
   module Associative = struct
