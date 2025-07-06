@@ -4,46 +4,46 @@ open Common
 open AIL
 
 module Context :
-  Quickmap.TYPE with type key = Name.t with type value = Kind.t
+  Quickmap.TYPE with type key = Name.t with type value = Type.t
 
 (** [infer_sort_of_sort sort] infers the sort of [sort].
     Returns [None] if it fails to do so. *)
 val infer_sort_of_sort : Sort.t -> Sort.t option
 
-(** [infer_kind_of_kind ~doctor ~context kind] infers the kind
-    of [kind] given a [context].
+(** [infer_type_of_type ~doctor ~context ty] infers the ty
+    of [ty] given a [context].
     Returns [None] if it fails to do so. *)
-val infer_kind_of_kind
+val infer_type_of_type
   :  doctor:Doctor.t
   -> context:Context.t
-  -> Kind.t
-  -> Kind.t option
+  -> Type.t
+  -> Type.t option
 
-(** [infer_kind_of_term ~doctor ~context term] infers the kind
+(** [infer_type_of_term ~doctor ~context term] infers the type
     of [term] given a [context].
     Returns [None] if it fails to do so. *)
-val infer_kind_of_term
+val infer_type_of_term
   :  doctor:Doctor.t
   -> context:Context.t
   -> Term.t
-  -> Kind.t option
+  -> Type.t option
 
-(** [infer_kind_of_primitive primitive] infers the kind of
+(** [infer_type_of_primitive primitive] infers the type of
     [primitive] given a [context].
     Returns [None] if it fails to do so. *)
-val infer_kind_of_primitive : Primitive.t -> Kind.t option
+val infer_type_of_primitive : Primitive.t -> Type.t option
 
-(** [infer_kind_of_parameterparameter] infers the kind of
-    [parameter] given a [context].
+(** [infer_type_of_parameter] infers the type of [parameter]
+    given a [context].
     Returns [None] if it fails to do so. *)
-val infer_kind_of_parameter : Parameter.t -> Kind.t option
+val infer_type_of_parameter : Parameter.t -> Type.t option
 
-(** [check_kind ~doctor ~expected found] determines whether the
-    kind [found] is compatible with the [expected] one. *)
-val check_kind
+(** [check_type ~doctor ~expected found] determines whether the
+    type [found] is compatible with the [expected] one. *)
+val check_type
   :  doctor:Doctor.t
-  -> expected:Kind.t
-  -> Kind.t
+  -> expected:Type.t
+  -> Type.t
   -> bool
 
 (** [check_sort ~expected found] determines whether the sort

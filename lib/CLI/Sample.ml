@@ -36,14 +36,14 @@ let lambda6 =
 
 let arrow2 =
   fun param1 param2 ret ->
-  Kind.arrow
+  Type.arrow
     (Named (a, param1))
     (Arrow (Named (b, param2), ret))
 ;;
 
 let arrow3 =
   fun param1 param2 param3 ret ->
-  Kind.arrow
+  Type.arrow
     (Named (a, param1))
     (Arrow (Named (b, param2), Arrow (Named (c, param3), ret)))
 ;;

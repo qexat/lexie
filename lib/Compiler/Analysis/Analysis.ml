@@ -3,7 +3,7 @@ open Custom
 open Clinic
 open Common
 open AIL
-module Context = Quickmap.Make (Name) (Kind)
+module Context = Quickmap.Make (Name) (Type)
 
 let nat = Name.of_string_exn "Nat"
 let unit = Name.of_string_exn "Unit"
@@ -12,7 +12,7 @@ let fetch_term
   :  doctor:Doctor.t
   -> context:Context.t
   -> Name.t
-  -> Kind.t option
+  -> Type.t option
   =
   fun ~doctor ~context name ->
   Context.get name context
@@ -24,69 +24,69 @@ let infer_sort_of_sort : Sort.t -> Sort.t option =
   fun _ -> Some Sort.Type
 ;;
 
-let infer_kind_of_primitive =
+let infer_type_of_primitive =
   fun prim ->
   (match (prim : Primitive.t) with
    | Nat _ -> nat
    | Unit -> unit)
   |> Term.var
-  |> Kind.term
+  |> Type.term
   |> Option.some
 ;;
 
-let infer_kind_of_parameter : Parameter.t -> Kind.t option =
+let infer_type_of_parameter : Parameter.t -> Type.t option =
   fun parameter ->
   match parameter with
-  | Named (_, kind) -> Some kind
+  | Named (_, ty) -> Some ty
 ;;
 
-let rec infer_kind_of_kind
+let rec infer_type_of_type
   :  doctor:Doctor.t
   -> context:Context.t
-  -> Kind.t
-  -> Kind.t option
+  -> Type.t
+  -> Type.t option
   =
-  fun ~doctor ~context kind ->
-  match kind with
+  fun ~doctor ~context ty ->
+  match ty with
   | Arrow _ -> Some (Sort Type)
   | Sort sort ->
     let+ sort_sort = infer_sort_of_sort sort in
-    Some (Kind.Sort sort_sort)
-  | Term term -> infer_kind_of_term ~doctor ~context term
+    Some (Type.Sort sort_sort)
+  | Term term -> infer_type_of_term ~doctor ~context term
 
-and infer_kind_of_term
+and infer_type_of_term
   :  doctor:Doctor.t
   -> context:Context.t
   -> Term.t
-  -> Kind.t option
+  -> Type.t option
   =
   fun ~doctor ~context term ->
   match term with
   | App (func, arg) -> try_apply ~doctor ~context func arg
-  | Fun ((Named (name, kind) as param), ret) ->
-    let+ param_kind = infer_kind_of_parameter param in
-    let+ ret_kind =
-      infer_kind_of_term
+  | Fun ((Named (name, ty) as param), ret) ->
+    let+ param_type = infer_type_of_parameter param in
+    let+ ret_type =
+      infer_type_of_term
         ~doctor
-        ~context:(Context.add name kind context)
+        ~context:(Context.add name ty context)
         ret
     in
-    Some (Kind.Arrow (Named (name, param_kind), ret_kind))
+    Some (Type.Arrow (Named (name, param_type), ret_type))
   | Hole ->
     Doctor.add_warning Diagnosis.Hole_found doctor;
     Some (Term Hole)
-  | Primitive prim -> infer_kind_of_primitive prim
+  | Primitive prim -> infer_type_of_primitive prim
   | Var name -> fetch_term ~doctor ~context name
 
-and check_kind
-  : doctor:Doctor.t -> expected:Kind.t -> Kind.t -> bool
+and check_type
+  : doctor:Doctor.t -> expected:Type.t -> Type.t -> bool
   =
   fun ~doctor ~expected found ->
-  match ((expected, found) : Kind.t * Kind.t) with
-  | ( Arrow (Named (_, e_kind), e_ret)
-    , Arrow (Named (_, f_kind), f_ret) ) ->
-    check_kind ~doctor ~expected:e_kind f_kind
-    && check_kind ~doctor ~expected:e_ret f_ret
+  match ((expected, found) : Type.t * Type.t) with
+  | ( Arrow (Named (_, e_type), e_ret)
+    , Arrow (Named (_, f_type), f_ret) ) ->
+    check_type ~doctor ~expected:e_type f_type
+    && check_type ~doctor ~expected:e_ret f_ret
   | Sort e_sort, Sort f_sort ->
     check_sort ~expected:e_sort f_sort
   | Term Hole, _ -> true
@@ -134,80 +134,80 @@ and check_parameter
   =
   fun ~doctor ~expected found ->
   match expected, found with
-  | Named (_, e_kind), Named (_, f_kind) ->
-    check_kind ~doctor ~expected:e_kind f_kind
+  | Named (_, e_type), Named (_, f_type) ->
+    check_type ~doctor ~expected:e_type f_type
 
 and try_apply
   :  doctor:Doctor.t
   -> context:Context.t
   -> Term.t
   -> Term.t
-  -> Kind.t option
+  -> Type.t option
   =
   fun ~doctor ~context func arg ->
-  let+ func_kind = infer_kind_of_term ~doctor ~context func in
-  let+ arg_kind = infer_kind_of_term ~doctor ~context arg in
-  match (func_kind : Kind.t) with
-  | Arrow (Named (name, kind), ret) ->
-    (match check_kind ~doctor ~expected:kind arg_kind with
+  let+ func_type = infer_type_of_term ~doctor ~context func in
+  let+ arg_type = infer_type_of_term ~doctor ~context arg in
+  match (func_type : Type.t) with
+  | Arrow (Named (name, ty), ret) ->
+    (match check_type ~doctor ~expected:ty arg_type with
      | false ->
        Doctor.add_error
          (Diagnosis.Argument_type_mismatch
-            { expected = kind; found = arg_kind })
+            { expected = ty; found = arg_type })
          doctor;
        None
      | true ->
        let right =
          propagate_parameter
-           (Parameter.Named (name, Kind.term arg))
+           (Parameter.Named (name, Type.term arg))
            ret
        in
        Some right)
   | _ ->
     Doctor.add_error
       (Diagnosis.Non_functional_application
-         { term = func; kind = func_kind })
+         { term = func; ty = func_type })
       doctor;
     None
 
-and propagate_parameter : Parameter.t -> Kind.t -> Kind.t =
-  fun (Named (param_name, param_kind)) rest ->
+and propagate_parameter : Parameter.t -> Type.t -> Type.t =
+  fun (Named (param_name, param_type)) rest ->
   let propagate =
-    propagate_parameter (Named (param_name, param_kind))
+    propagate_parameter (Named (param_name, param_type))
   in
   match rest with
-  | Arrow (Named (name, kind), ret) ->
-    Kind.arrow (Named (name, propagate kind)) (propagate ret)
+  | Arrow (Named (name, ty), ret) ->
+    Type.arrow (Named (name, propagate ty)) (propagate ret)
   | Sort _ -> rest
   | Term term ->
     (match term with
-     | Fun (Named (param_name', param_kind'), ret') ->
-       Kind.term
+     | Fun (Named (param_name', param_type'), ret') ->
+       Type.term
          (Term.lambda
-            (Named (param_name', propagate param_kind'))
+            (Named (param_name', propagate param_type'))
             ret')
-     | Var name when Name.equal name param_name -> param_kind
-     | _ -> Kind.term term)
+     | Var name when Name.equal name param_name -> param_type
+     | _ -> Type.term term)
 ;;
 
 let compare_with_annotation
   :  doctor:Doctor.t
-  -> annotation:Kind.t option
-  -> Kind.t
-  -> Kind.t option
+  -> annotation:Type.t option
+  -> Type.t
+  -> Type.t option
   =
-  fun ~doctor ~annotation found_kind ->
+  fun ~doctor ~annotation found_type ->
   match annotation with
-  | None -> Some found_kind
-  | Some kind ->
-    (match check_kind ~doctor ~expected:kind found_kind with
+  | None -> Some found_type
+  | Some ty ->
+    (match check_type ~doctor ~expected:ty found_type with
      | false ->
        Doctor.add_warning
          (Diagnosis.Annotation_type_mismatch
-            { expected = kind; found = found_kind })
+            { expected = ty; found = found_type })
          doctor;
-       Some found_kind
-     | true -> Some kind)
+       Some found_type
+     | true -> Some ty)
 ;;
 
 let check_statement
@@ -219,13 +219,13 @@ let check_statement
   fun ~doctor ~context statement ->
   match (statement : Statement.t) with
   | Let (name, annotation, body) ->
-    let+ body_kind = infer_kind_of_term ~doctor ~context body in
-    let+ assigned_kind =
-      compare_with_annotation ~doctor ~annotation body_kind
+    let+ body_type = infer_type_of_term ~doctor ~context body in
+    let+ assigned_type =
+      compare_with_annotation ~doctor ~annotation body_type
     in
-    Some (Context.add name assigned_kind context)
+    Some (Context.add name assigned_type context)
   | Print term ->
-    let+ _ = infer_kind_of_term ~doctor ~context term in
+    let+ _ = infer_type_of_term ~doctor ~context term in
     Some context
 ;;
 
@@ -250,12 +250,12 @@ let intrinsics : Context.t =
   let _S = Name.of_string_exn "S" in
   let n = Name.of_string_exn "n" in
   Context.empty
-  |> Context.add _Nat (Kind.sort Type)
-  |> Context.add _Unit (Kind.sort Type)
-  |> Context.add _O (Kind.term (Var _Nat))
+  |> Context.add _Nat (Type.sort Type)
+  |> Context.add _Unit (Type.sort Type)
+  |> Context.add _O (Type.term (Var _Nat))
   |> Context.add
        _S
-       (Kind.arrow
-          (Named (n, Kind.term (Var _Nat)))
+       (Type.arrow
+          (Named (n, Type.term (Var _Nat)))
           (Term (Var _Nat)))
 ;;

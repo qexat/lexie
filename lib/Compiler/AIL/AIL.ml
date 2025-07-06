@@ -23,27 +23,27 @@ end = struct
   ;;
 end
 
-module rec Kind : sig
+module rec Type : sig
   type t =
     | Arrow of Parameter.t * t
     | Sort of Sort.t
     | Term of Term.t
 
-  (** [arrow param ret] produces an arrow kind where [param] and
+  (** [arrow param ret] produces an arrow type where [param] and
     [ret] are on the left and right handside of the arrow
     respectively. *)
   val arrow : Parameter.t -> t -> t
 
-  (** [sort s] produces a sort kind where [s] is the underlying
+  (** [sort s] produces a sort type where [s] is the underlying
     sort. *)
   val sort : Sort.t -> t
 
-  (** [term t] produces a term kind where [t] is the underlying
+  (** [term t] produces a term type where [t] is the underlying
     term. *)
   val term : Term.t -> t
 
-  (** [show painter kind] produces a pretty-printable
-    representation of [kind]. *)
+  (** [show painter ty] produces a pretty-printable
+    representation of [ty]. *)
   val show : (module Painter.TYPE) -> t -> string
 end = struct
   type t =
@@ -56,8 +56,8 @@ end = struct
   let term = fun term -> Term term
 
   let rec show =
-    fun painter kind ->
-    match kind with
+    fun painter ty ->
+    match ty with
     | Arrow (param, ret) ->
       Printf.sprintf
         "%s -> %s"
@@ -210,48 +210,48 @@ end = struct
 end
 
 and Parameter : sig
-  type nonrec t = Named of Name.t * Kind.t
+  type nonrec t = Named of Name.t * Type.t
 
   (** [name param] returns the name of the [param]eter. *)
   val name : t -> Name.t
 
-  (** [kind param] returns the kind annotation of the [param]eter. *)
-  val kind : t -> Kind.t
+  (** [ty param] returns the type annotation of the [param]eter. *)
+  val ty : t -> Type.t
 
   (** [show painter param] produces a pretty-printable
     representation of the [param]eter. *)
   val show : (module Painter.TYPE) -> t -> string
 end = struct
-  type nonrec t = Named of Name.t * Kind.t
+  type nonrec t = Named of Name.t * Type.t
 
   let name = function
     | Named (name, _) -> name
   ;;
 
-  let kind = function
-    | Named (_, kind) -> kind
+  let ty = function
+    | Named (_, ty) -> ty
   ;;
 
   let show =
     fun painter parameter ->
     match parameter with
-    | Named (name, kind) ->
+    | Named (name, ty) ->
       Printf.sprintf
         "(%s : %s)"
         (Name.show painter name)
-        (Kind.show painter kind)
+        (Type.show painter ty)
   ;;
 end
 
 module Statement : sig
   type t =
-    | Let of Name.t * Kind.t option * Term.t
+    | Let of Name.t * Type.t option * Term.t
     | Print of Term.t
 
   (** [let' name ?annotation body] creates a [Let] statement given
     a binding's [name], an optional [annotation] and its [body]
     term. *)
-  val let' : Name.t -> ?annotation:Kind.t -> Term.t -> t
+  val let' : Name.t -> ?annotation:Type.t -> Term.t -> t
 
   (** [print term] creates a [Print] statement given a [term]. *)
   val print : Term.t -> t
@@ -261,7 +261,7 @@ module Statement : sig
   val show : (module Painter.TYPE) -> t -> string
 end = struct
   type nonrec t =
-    | Let of Name.t * Kind.t option * Term.t
+    | Let of Name.t * Type.t option * Term.t
     | Print of Term.t
 
   let let' =
@@ -284,13 +284,13 @@ end = struct
            (Name.show painter name));
       (match annotation with
        | None -> ()
-       | Some kind ->
+       | Some ty ->
          Buffer.add_string
            buffer
            (Printf.sprintf
               " %s %s"
               (Painter.paint_keyword ":")
-              (Kind.show painter kind)));
+              (Type.show painter ty)));
       Buffer.add_string
         buffer
         (Printf.sprintf
