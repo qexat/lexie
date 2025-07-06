@@ -5,9 +5,7 @@ module rec Pervasives : sig
       tuple. *)
   type unit = ()
 
-  type bool =
-    | False
-    | True
+  type nonrec bool = bool
 
   type compare =
     | Equal
@@ -63,11 +61,8 @@ module rec Pervasives : sig
   val ( || ) : bool -> bool -> bool
   val ( |> ) : 'arg 'ret. 'arg -> ('arg -> 'ret) -> 'ret
 end = struct
-  type unit = ()
-
-  type bool =
-    | False
-    | True
+  type nonrec unit = ()
+  type nonrec bool = bool
 
   type compare =
     | Equal
@@ -132,7 +127,7 @@ end = struct
   type ty = unit
 
   let compare : ty -> ty -> compare = fun () () -> Equal
-  let equal : ty -> ty -> bool = fun () () -> True
+  let equal : ty -> ty -> bool = fun () () -> true
 end
 
 and Bool : sig
@@ -151,9 +146,9 @@ end = struct
   let compare : ty -> ty -> compare =
     fun left right ->
     match left, right with
-    | False, False | True, True -> Equal
-    | True, False -> Greater
-    | False, True -> Less
+    | false, false | true, true -> Equal
+    | true, false -> Greater
+    | false, true -> Less
   ;;
 
   let equal : ty -> ty -> bool =
@@ -161,20 +156,20 @@ end = struct
   ;;
 
   let not : ty -> ty = function
-    | False -> True
-    | True -> False
+    | false -> true
+    | true -> false
   ;;
 
   let ( && ) left right =
     match left, right with
-    | True, True -> True
-    | _, _ -> False
+    | true, true -> true
+    | _, _ -> false
   ;;
 
   let ( || ) left right =
     match left, right with
-    | False, False -> False
-    | _, _ -> True
+    | false, false -> false
+    | _, _ -> true
   ;;
 end
 
@@ -203,8 +198,8 @@ end = struct
 
   let ( = ) left right =
     match left, right with
-    | Equal, Equal | Greater, Greater | Less, Less -> True
-    | _, _ -> False
+    | Equal, Equal | Greater, Greater | Less, Less -> true
+    | _, _ -> false
   ;;
 
   (* [is_either] is mostly useful for [>=] and [<=]. *)
@@ -336,8 +331,8 @@ end = struct
     match left, right with
     | Some item_left, Some item_right ->
       item_equal item_left item_right
-    | Nothing, Nothing -> True
-    | _, _ -> False
+    | Nothing, Nothing -> true
+    | _, _ -> false
   ;;
 
   let are_same_variants
@@ -345,8 +340,8 @@ end = struct
     =
     fun left right ->
     match left, right with
-    | Nothing, Nothing | Some _, Some _ -> True
-    | _, _ -> False
+    | Nothing, Nothing | Some _, Some _ -> true
+    | _, _ -> false
   ;;
 
   let map
@@ -682,8 +677,8 @@ end = struct
 
   let rec fix f x = f (fix f) x
   let contract f x = f x x
-  let tautology _ = True
-  let antilogy _ = False
+  let tautology _ = true
+  let antilogy _ = false
   let negate f x = not (f x)
   let negate_binary f left right = not (f left right)
   let map contra co f = contra -*> f -*> co
